@@ -1,0 +1,61 @@
+<form id="frmBusquedaAlumnos">
+    <div class="card text-bg-dark">
+        <div class="card-header">
+            <div class="d-flex">
+                BUSQUEDA DE ALUMNOS
+                <div class="ms-auto">
+                    <button data-form="busqueda_alumnos" type="button" class="btn-close btn-close-white" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-dark table-striped text-white">
+                <thead>
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>NOMBRE</th>
+                        <th>DIRECCION</th>
+                        <th>TELEFONO</th>
+                        <th>EMAIL</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tblAlumnos"></tbody>
+            </table>
+        </div>
+    </div>
+</form>
+<script>
+    obtenerAlumnos();
+    async function obtenerAlumnos(){
+        let response = await fetch("/alumnos"), 
+            respuesta = await response.json();
+        mostrarDatosAlumnos(respuesta);
+    }
+    function mostrarDatosAlumnos(alumnos){
+        let filas = "";
+        alumnos.forEach(alumno=>{
+            filas += `
+                <tr onClick='mostrarAlumno(${ JSON.stringify(alumno) })'>
+                    <td>${alumno.codigo}</td>
+                    <td>${alumno.nombre}</td>
+                    <td>${alumno.direccion}</td>
+                    <td>${alumno.telefono}</td>
+                    <td>${alumno.email}</td>
+                    <td><button onClick='eliminarAlumno(${ JSON.stringify(alumno) }, event)' class="btn btn-outline-danger btn-sm">ELIMINAR</button></td>
+                </tr>
+            `;
+        });
+        tblAlumnos.innerHTML = filas;
+    }
+    function eliminarAlumno(alumno, event){
+        event.preventDefault();
+
+        if(confirm(`Esta seguro de eliminar a ${alumno.nombre}`)){
+            idAlumno = alumno.idAlumno;
+            accion = "eliminar";
+            guardarAlumnos();
+            alertify.success('Alumno eliminado correctamente');
+        }
+    }
+</script>
