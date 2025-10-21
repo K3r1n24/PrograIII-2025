@@ -60,10 +60,19 @@
                 .then(response => response.text())
                 .then(ventana => {
                     $(`#${form}`).html(ventana).draggable();
+                    cerrarVentana();
                     if(callback) callback();
                 })
                 .catch(error => console.error('Error al cargar el formulario:', error));
+            }else{
+                $(`#${form}`).show();
             }
+        }
+        function cerrarVentana(){
+            $('.btn-close').off('click').click(e=>{
+                let form = e.target.dataset.form;
+                $(`#${form}`).hide();
+            });
         }
     </script>
 </body>
