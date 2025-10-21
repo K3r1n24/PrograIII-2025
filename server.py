@@ -12,6 +12,11 @@ class miServidor(SimpleHTTPRequestHandler):
         if self.path=="/":
             self.path="index.html"
             return SimpleHTTPRequestHandler.do_GET(self)
+        if self.path=="/alumnos":
+            alumnos = crudAlumno.consultar("")
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(json.dumps(alumnos).encode('utf-8'))
     
     def do_POST(self):
         longitud = int(self.headers['Content-Length'])
