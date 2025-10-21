@@ -16,28 +16,53 @@
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/bootstrap.min.css"/>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">::.. SISTEMA ACADEMICO ..::</a>
-            <div class="collapse navbar-collapse" id="mnxAcademica">
-                <div class="navbar-nav">
-                    <a class="nav-link" href="#" data-form="alumnos">Alumnos</a>
-                    <a class="nav-link" href="#" data-form="materias">Materias</a>
-                    <a class="nav-link" href="#" data-form="docentes">Docentes</a>
-                    <a class="nav-link" href="#" data-form="notas">Notas</a>
+    <!-- Añadido: Login como primera pantalla -->
+    <div id="login" class="d-flex justify-content-center align-items-center vh-100" style="display: block;">
+        <div class="card p-4">
+            <h1>Login de Usuarios</h1>
+            <form id="formLogin">
+                <div class="mb-3">
+                    <label>Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" required>
+                </div>
+                <div class="mb-3">
+                    <label>Clave:</label>
+                    <input type="password" class="form-control" id="clave" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ingresar</button>
+            </form>
+            <p id="mensaje" class="text-danger mt-2"></p>
+        </div>
+    </div>
+
+    <!-- Tu contenido original, oculto hasta login -->
+    <div id="mainContent" style="display: none;">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">::.. SISTEMA ACADEMICO ..::</a>
+                <div class="collapse navbar-collapse" id="mnxAcademica">
+                    <div class="navbar-nav">
+                        <a class="nav-link" href="#" data-form="alumnos">Alumnos</a>
+                        <a class="nav-link" href="#" data-form="materias">Materias</a>
+                        <a class="nav-link" href="#" data-form="docentes">Docentes</a>
+                        <a class="nav-link" href="#" data-form="notas">Notas</a>
+                        <a class="nav-link" href="#" data-form="usuarios">Usuarios</a>  <!-- Añadido -->
+                    </div>
                 </div>
             </div>
+        </nav>
+        <div class="container-fluid">
+            <div class="position-absolute" id="alumnos"></div>
+            <div class="position-absolute" id="busqueda_alumnos"></div>
+            <div class="position-absolute" id="materias"></div>
+            <div class="position-absolute" id="busqueda_materias"></div>
+            <div class="position-absolute" id="docentes"></div>
+            <div class="position-absolute" id="busqueda_docentes"></div>
+            <div class="position-absolute" id="notas"></div>
+            <div class="position-absolute" id="busqueda_notas"></div>
+            <div class="position-absolute" id="usuarios"></div>  <!-- Añadido -->
+            <div class="position-absolute" id="busqueda_usuarios"></div>  <!-- Añadido -->
         </div>
-    </nav>
-    <div class="container-fluid">
-        <div class="position-absolute" id="alumnos"></div>
-        <div class="position-absolute" id="busqueda_alumnos"></div>
-        <div class="position-absolute" id="materias"></div>
-        <div class="position-absolute" id="busqueda_materias"></div>
-        <div class="position-absolute" id="docentes"></div>
-        <div class="position-absolute" id="busqueda_docentes"></div>
-        <div class="position-absolute" id="notas"></div>
-        <div class="position-absolute" id="busqueda_notas"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
@@ -46,6 +71,24 @@
     <!-- JavaScript -->
     <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script>
+        // Añadido: Login
+        $('#formLogin').submit(function(e) {
+            e.preventDefault();
+            const data = {
+                usuario: $('#usuario').val(),
+                clave: $('#clave').val()
+            };
+            $.post('/verificar_login', JSON.stringify(data), function(result) {
+                if (result.acceso) {
+                    $('#login').hide();
+                    $('#mainContent').show();
+                } else {
+                    $('#mensaje').text('Acceso denegado');
+                }
+            }, 'json');
+        });
+
+        // Tu script original
         document.addEventListener("DOMContentLoaded", event=>{
             mnxAcademica.addEventListener('click', e=>{
                 e.preventDefault();
@@ -74,6 +117,49 @@
                 $(`#${form}`).hide();
             });
         }
+
+        // Añadido: Gestión de usuarios (inline en index.html, asumiendo que creas modulos/usuarios.html con formulario)
+        function buscarUsuarios() {
+            const buscar = $('#buscarUsuario').val();
+            $.get('/usuarios?buscar=' + buscar, function(usuarios) {
+                $('#listaUsuarios').empty();
+                usuarios.forEach(u => {
+                    $('#listaUsuarios').append(`<li class="list-group-item">${u.nombre} (${u.usuario}) 
+                        <button class="btn btn-warning btn-sm" onclick="editarUsuario(${u.idUsuario})">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${u.idUsuario})">Eliminar</button></li>`);
+                });
+            });
+        }
+        function editarUsuario(id) {
+            const nuevoNombre = prompt('Nuevo nombre:');
+            if (nuevoNombre) {
+                $.post('/administrar_usuario', JSON.stringify({accion: 'modificar', idUsuario: id, nombre: nuevoNombre, usuario: '', clave: '', direccion: '', telefono: ''}), function() {
+                    buscarUsuarios();
+                });
+            }
+        }
+        function eliminarUsuario(id) {
+            if (confirm('¿Eliminar?')) {
+                $.post('/administrar_usuario', JSON.stringify({accion: 'eliminar', idUsuario: id}), function() {
+                    buscarUsuarios();
+                });
+            }
+        }
+        // Registro inline
+        $('#formRegistro').submit(function(e) {
+            e.preventDefault();
+            const data = {
+                accion: 'nuevo',
+                usuario: $('#regUsuario').val(),
+                clave: $('#regClave').val(),
+                nombre: $('#regNombre').val(),
+                direccion: $('#regDireccion').val(),
+                telefono: $('#regTelefono').val()
+            };
+            $.post('/administrar_usuario', JSON.stringify(data), function(result) {
+                alertify.success(result.msg);
+            }, 'json');
+        });
     </script>
 </body>
 </html>
