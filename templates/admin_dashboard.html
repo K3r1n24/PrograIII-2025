@@ -1,0 +1,3122 @@
+{% extends "base.html" %}
+
+{% block title %}Panel Administrativo - FLIA UGB 2025{% endblock %}
+
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-shield-halved"></i>
+            <h4>Admin Panel</h4>
+            <span>Feria de Logros 2025</span>
+        </div>
+        
+        <div class="wave-divider">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="rgba(236, 240, 241, 0.3)"></path>
+            </svg>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="menu-item active" data-tab="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Inicio</span>
+            </li>
+            <li class="menu-item" data-tab="jueces">
+                <i class="fas fa-gavel"></i>
+                <span>Jueces</span>
+            </li>
+            <li class="menu-item" data-tab="estudiantes">
+                <i class="fas fa-user-graduate"></i>
+                <span>Estudiantes</span>
+            </li>
+            <li class="menu-item" data-tab="equipos">
+                <i class="fas fa-users"></i>
+                <span>Grupos</span>
+            </li>
+            <li class="menu-item" data-tab="evaluaciones">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Evaluaciones</span>
+            </li>
+            <li class="menu-item" data-tab="registros-pendientes">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Registros Pendientes</span>
+            </li>
+            <li class="menu-item" data-tab="historial">
+                <i class="fas fa-history"></i>
+                <span>Historial</span>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="admin-main-area">
+        <div class="content-container">
+            
+            <section class="tab-section {% if not seccion_activa or seccion_activa == 'dashboard' %}active{% endif %}" id="dashboard">
+                <div class="search-bar-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchDashboard" class="search-input" placeholder="Buscar proyectos, grupos, estudiantes o jueces..." onkeyup="buscarEnDashboard()">
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <article class="metric-card blue clickable" onclick="navigateToTab('estudiantes')">
+                        <div class="metric-icon-square">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3>{{ participantes|length }}</h3>
+                            <p>Participantes</p>
+                        </div>
+                        <div class="metric-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </article>
+
+                    <article class="metric-card green clickable" onclick="navigateToTab('equipos')">
+                        <div class="metric-icon-square">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3>{{ proyectos|length }}</h3>
+                            <p>Proyectos</p>
+                        </div>
+                        <div class="metric-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </article>
+
+                    <article class="metric-card orange clickable" onclick="navigateToTab('jueces')">
+                        <div class="metric-icon-square">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3>{{ jueces|length }}</h3>
+                            <p>Jueces</p>
+                        </div>
+                        <div class="metric-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </article>
+
+                    <article class="metric-card purple clickable" onclick="navigateToTab('evaluaciones')">
+                        <div class="metric-icon-square">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3>{{ evaluaciones|length }}</h3>
+                            <p>Evaluaciones</p>
+                        </div>
+                        <div class="metric-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="stats-enhanced-grid">
+                    <div class="stat-enhanced blue clickable" onclick="navigateToTab('equipos')">
+                        <div class="stat-enhanced-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-enhanced-info">
+                            <h3>{{ grupos_stats.con_proyecto }}</h3>
+                            <p>Proyectos Activos</p>
+                        </div>
+                        <div class="stat-arrow-mini">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-enhanced orange clickable" onclick="navigateToTab('registros-pendientes')">
+                        <div class="stat-enhanced-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-enhanced-info">
+                            <h3>{{ grupos_stats.sin_proyecto }}</h3>
+                            <p>Registros Pendientes</p>
+                        </div>
+                        <div class="stat-badge">Ver detalles</div>
+                    </div>
+                    
+                    <div class="stat-enhanced green clickable" onclick="filtrarGruposConJuez()">
+                        <div class="stat-enhanced-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-enhanced-info">
+                            <h3>{{ grupos_stats.con_juez }}</h3>
+                            <p>Con Juez Asignado</p>
+                        </div>
+                        <div class="stat-arrow-mini">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                    
+                    <article class="stat-enhanced purple clickable" onclick="navigateToTab('equipos')">
+                        <div class="stat-enhanced-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-enhanced-info">
+                            <h3>{{ grupos_stats.total }}</h3>
+                            <p>Total de Grupos</p>
+                        </div>
+                        <div class="stat-arrow-mini">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="category-distribution">
+                    <h3><i class="fas fa-chart-pie me-2"></i>Distribución por Categoría</h3>
+                    <div class="category-grid">
+                        <div class="category-card programacion clickable" onclick="filtrarPorCategoria('Programación')">
+                            <div class="category-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="category-info">
+                                <h4>{{ grupos_stats.programacion }}</h4>
+                                <p>Programación</p>
+                            </div>
+                            <div class="category-percentage">
+                                {% if grupos_stats.programacion > 0 and grupos_stats.total > 0 %}
+                                    {{ ((grupos_stats.programacion / grupos_stats.total) * 100) | round | int }}%
+                                {% elif grupos_stats.programacion == 0 %}
+                                    <span style="font-size: 0.9rem; color: #95a5a6; font-weight: 500;">Sin proyectos</span>
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="category-card electronica clickable" onclick="filtrarPorCategoria('Electrónica')">
+                            <div class="category-icon">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <div class="category-info">
+                                <h4>{{ grupos_stats.electronica }}</h4>
+                                <p>Electrónica</p>
+                            </div>
+                            <div class="category-percentage">
+                                {% if grupos_stats.electronica > 0 and grupos_stats.total > 0 %}
+                                    {{ ((grupos_stats.electronica / grupos_stats.total) * 100) | round | int }}%
+                                {% elif grupos_stats.electronica == 0 %}
+                                    <span style="font-size: 0.9rem; color: #95a5a6; font-weight: 500;">Sin proyectos</span>
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="category-card robotica clickable" onclick="filtrarPorCategoria('Robótica')">
+                            <div class="category-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="category-info">
+                                <h4>{{ grupos_stats.robotica }}</h4>
+                                <p>Robótica</p>
+                            </div>
+                            <div class="category-percentage">
+                                {% if grupos_stats.robotica > 0 and grupos_stats.total > 0 %}
+                                    {{ ((grupos_stats.robotica / grupos_stats.total) * 100) | round | int }}%
+                                {% elif grupos_stats.robotica == 0 %}
+                                    <span style="font-size: 0.9rem; color: #95a5a6; font-weight: 500;">Sin proyectos</span>
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions-enhanced">
+                    <h3><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h3>
+                    <div class="actions-enhanced-grid">
+                        <button class="action-btn-large primary" onclick="navigateToTab('registros-pendientes')">
+                            <div class="action-icon-large">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="action-text">
+                                <h4>Ver Registros Pendientes</h4>
+                                <p>Grupos sin proyecto, evaluaciones pendientes y más</p>
+                            </div>
+                            <i class="fas fa-arrow-right action-arrow-large"></i>
+                        </button>
+                        
+                        <button class="action-btn-large success" onclick="abrirModalConfiguracion()">
+                            <div class="action-icon-large">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div class="action-text">
+                                <h4>Configurar Feria</h4>
+                                <p>Cerrar feria, gestionar fechas y configuraciones</p>
+                            </div>
+                            <i class="fas fa-arrow-right action-arrow-large"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-section {% if seccion_activa == 'jueces' %}active{% endif %}" id="jueces">
+                <header class="page-header">
+                    <div>
+                        <h2><i class="fas fa-gavel me-2"></i>Gestión de Jueces</h2>
+                        <p>Administra los evaluadores de proyectos por categoría</p>
+                    </div>
+                    <button class="btn-add" onclick="abrirModalNuevoJuez()">
+                        <i class="fas fa-plus"></i>
+                        Nuevo Juez
+                    </button>
+                </header>
+
+                <div class="search-bar-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchJueces" class="search-input" placeholder="Buscar juez por nombre o correo..." onkeyup="buscarJueces()">
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <button class="filter-chip active" data-category="all" onclick="filtrarJuecesPorCategoria('all')">
+                        Todos <span>{{ jueces|length }}</span>
+                    </button>
+                    <button class="filter-chip" data-category="Programación" onclick="filtrarJuecesPorCategoria('Programación')">
+                        <i class="fas fa-code"></i> Programación <span>{{ jueces|selectattr('categoria_asignada', 'equalto', 'Programación')|list|length }}</span>
+                    </button>
+                    <button class="filter-chip" data-category="Electrónica" onclick="filtrarJuecesPorCategoria('Electrónica')">
+                        <i class="fas fa-microchip"></i> Electrónica <span>{{ jueces|selectattr('categoria_asignada', 'equalto', 'Electrónica')|list|length }}</span>
+                    </button>
+                    <button class="filter-chip" data-category="Robótica" onclick="filtrarJuecesPorCategoria('Robótica')">
+                        <i class="fas fa-robot"></i> Robótica <span>{{ jueces|selectattr('categoria_asignada', 'equalto', 'Robótica')|list|length }}</span>
+                    </button>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Evaluador</th>
+                                <th>Email</th>
+                                <th>Categoría</th>
+                                <th>Proyectos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="juecesTableBody">
+                            {% if jueces %}
+                                {% for juez in jueces %}
+                                <tr data-nombre="{{ juez.nombre|lower }}" data-correo="{{ juez.correo|lower }}" data-categoria="{{ juez.categoria_asignada|lower if juez.categoria_asignada else 'sin categoría' }}">
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="avatar">{{ juez.nombre[0] }}</div>
+                                            <div>
+                                                <strong>{{ juez.nombre }}</strong>
+                                                <small class="text-muted d-block">Registrado: {{ juez.fecha_registro.strftime('%d/%m/%Y') if juez.fecha_registro else 'N/A' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ juez.correo }}</td>
+                                    <td>
+                                        {% if juez.categoria_asignada %}
+                                            {% if juez.categoria_asignada == 'Programación' %}
+                                                <span class="badge categoria-badge programacion"><i class="fas fa-code me-1"></i>{{ juez.categoria_asignada }}</span>
+                                            {% elif juez.categoria_asignada == 'Electrónica' %}
+                                                <span class="badge categoria-badge electronica"><i class="fas fa-microchip me-1"></i>{{ juez.categoria_asignada }}</span>
+                                            {% elif juez.categoria_asignada == 'Robótica' %}
+                                                <span class="badge categoria-badge robotica"><i class="fas fa-robot me-1"></i>{{ juez.categoria_asignada }}</span>
+                                            {% else %}
+                                                <span class="badge categoria-badge general"><i class="fas fa-lightbulb me-1"></i>{{ juez.categoria_asignada }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge categoria-badge sin-categoria"><i class="fas fa-question me-1"></i>Sin categoría</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge proyecto-count {{ 'con-proyectos' if juez.proyectos_asignados and juez.proyectos_asignados > 0 else 'sin-proyectos' }}">
+                                            {{ juez.proyectos_asignados if juez.proyectos_asignados else 0 }} asignado(s)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="acciones-juez">
+                                            <!-- DATA-ATTRIBUTES: Usamos data-attributes para pasar los datos -->
+                                            <button 
+                                                class="btn-icon edit btn-edit-juez-modal" 
+                                                data-juez-id="{{ juez.id }}" 
+                                                data-juez-nombre="{{ juez.nombre|replace("'", "\'") }}" 
+                                                data-juez-correo="{{ juez.correo|replace("'", "\'") }}" 
+                                                data-juez-categoria="{{ juez.categoria_asignada|replace("'", "\'") }}"
+                                                title="Editar juez">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            
+                                            <!-- DATA-ATTRIBUTES: Usamos data-attributes para pasar los datos -->
+                                            <button 
+                                                class="btn-icon delete btn-delete-juez" 
+                                                data-juez-id="{{ juez.id }}" 
+                                                data-juez-nombre="{{ juez.nombre|replace("'", "\'") }}"
+                                                title="Eliminar juez">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="empty-message">
+                                        <i class="fas fa-user-tie"></i>
+                                        <p>No hay jueces registrados</p>
+                                        <button class="btn-add mt-3" onclick="abrirModalNuevoJuez()">
+                                            <i class="fas fa-plus"></i> Crear Primer Juez
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="tab-section {% if seccion_activa == 'estudiantes' %}active{% endif %}" id="estudiantes">
+                <header class="page-header">
+                    <div>
+                        <h2><i class="fas fa-user-graduate me-2"></i>Gestión de Estudiantes</h2>
+                        <p>Administra los participantes de la feria y sus grupos</p>
+                    </div>
+                    <button class="btn-add" onclick="abrirModalNuevoEstudiante()">
+                        <i class="fas fa-plus"></i> Nuevo Estudiante
+                    </button>
+                </header>
+
+                <div class="search-bar-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchEstudiantes" class="search-input" placeholder="Buscar estudiante por nombre, correo o grupo..." onkeyup="buscarEstudiantes()">
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <button class="filter-chip active" data-category="all" onclick="filtrarEstudiantes('all', event)">Todos <span>{{ participantes|length }}</span></button>
+                    <button class="filter-chip" data-category="con-grupo" onclick="filtrarEstudiantes('con-grupo', event)"><i class="fas fa-users"></i> Con Grupo <span>{{ participantes|selectattr('grupo_nombre', 'ne', 'Sin grupo')|list|length }}</span></button>
+                    <button class="filter-chip" data-category="sin-grupo" onclick="filtrarEstudiantes('sin-grupo', event)"><i class="fas fa-user-times"></i> Sin Grupo <span>{{ participantes|selectattr('grupo_nombre', 'equalto', 'Sin grupo')|list|length }}</span></button>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Correo</th>
+                                <th>Ciclo</th>
+                                <th>Grupo</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estudiantesTableBody">
+                            {% if participantes %}
+                                {% for estudiante in participantes %}
+                                <!-- IMPORTANTE: El atributo data-grupo debe ser consistente para el filtro -->
+                                <tr data-nombre="{{ (estudiante.nombre + ' ' + estudiante.apellido)|lower }}" 
+                                    data-correo="{{ estudiante.correo|lower if estudiante.correo else estudiante.cuenta|lower }}" 
+                                    data-grupo="{{ estudiante.grupo_nombre|lower|replace(" ", "-") }}" 
+                                    data-categoria="{{ estudiante.categoria|lower|replace(" ", "-") }}">
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="avatar blue">{{ estudiante.nombre[0] if estudiante.nombre else 'E' }}</div>
+                                            <div>
+                                                <strong>{{ estudiante.nombre }} {{ estudiante.apellido }}</strong>
+                                                <small class="text-muted d-block">Registrado: {{ estudiante.fecha_registro.strftime('%d/%m/%Y') if estudiante.fecha_registro else 'N/A' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ estudiante.correo if estudiante.correo else estudiante.cuenta }}</td>
+                                    <td><span class="badge ciclo-badge">{{ estudiante.ciclo }}</span></td>
+                                    <td>
+                                        {% if estudiante.grupo_nombre and estudiante.grupo_nombre != 'Sin grupo' and estudiante.grupo_nombre != 'Grupo no encontrado' %}
+                                            <div class="grupo-info">
+                                                <strong>{{ estudiante.grupo_nombre }}</strong>
+                                                <small class="text-muted d-block">Código: {{ estudiante.grupo_codigo }}</small>
+                                            </div>
+                                        {% else %}
+                                            <span class="badge sin-grupo">Sin grupo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if estudiante.categoria and estudiante.categoria != 'Sin categoría' %}
+                                            {% if 'program' in estudiante.categoria.lower() %}
+                                                <span class="badge categoria-badge programacion"><i class="fas fa-code me-1"></i>{{ estudiante.categoria }}</span>
+                                            {% elif 'electron' in estudiante.categoria.lower() %}
+                                                <span class="badge categoria-badge electronica"><i class="fas fa-microchip me-1"></i>{{ estudiante.categoria }}</span>
+                                            {% elif 'robot' in estudiante.categoria.lower() %}
+                                                <span class="badge categoria-badge robotica"><i class="fas fa-robot me-1"></i>{{ estudiante.categoria }}</span>
+                                            {% else %}
+                                                <span class="badge categoria-badge general"><i class="fas fa-lightbulb me-1"></i>{{ estudiante.categoria }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge categoria-badge sin-categoria"><i class="fas fa-question me-1"></i>Sin categoría</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <td>
+                                        <div class="acciones-estudiante">  <!-- ✅ DIV ABIERTO -->
+                                            <!-- DATA-ATTRIBUTES: Botón para ABRIR MODAL DE VER/EDITAR -->
+                                            <button 
+                                                class="btn-icon edit btn-view-estudiante-modal" 
+                                                data-estudiante-id="{{ estudiante.id }}" 
+                                                title="Ver/Editar estudiante">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            
+                                            <!-- DATA-ATTRIBUTES: Botón para ELIMINAR -->
+                                            <button 
+                                                class="btn-icon delete btn-delete-estudiante" 
+                                                data-estudiante-id="{{ estudiante.id }}" 
+                                                data-estudiante-nombre="{{ (estudiante.nombre + ' ' + estudiante.apellido)|replace("'", "\'") }}"
+                                                title="Eliminar estudiante">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>  <!-- ✅ DIV SE CIERRA DESPUÉS DE LOS BOTONES -->
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="empty-message">
+                                        <i class="fas fa-user-slash"></i>
+                                        <p>No hay estudiantes registrados</p>
+                                        <button class="btn-add mt-3" onclick="abrirModalNuevoEstudiante()">
+                                            <i class="fas fa-plus"></i> Crear Primer Estudiante
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="tab-section {% if seccion_activa == 'equipos' %}active{% endif %}" id="equipos">
+                <header class="page-header">
+                    <div>
+                        <h2><i class="fas fa-users me-2"></i>Gestión de Equipos</h2>
+                        <p>Administra los grupos de trabajo y sus categorías</p>
+                    </div>
+                    <button class="btn-add" onclick="abrirModalCrearGrupo()">
+                        <i class="fas fa-plus"></i> Crear Grupo
+                    </button>
+                </header>
+
+                <div class="search-bar-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchGrupos" class="search-input" placeholder="Buscar grupo por nombre, código o categoría..." onkeyup="buscarGruposMejorado()">
+                        <button class="btn btn-outline-secondary ms-2" onclick="buscarGruposMejorado()" style="border-radius: 8px;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-bar" id="filtrosGrupos">
+                    <button class="filter-chip active" data-category="all" onclick="filtrarGruposMejorado(event, 'all')">Todos <span class="filter-count">{{ grupos|length }}</span></button>
+                    <button class="filter-chip" data-category="Programación" onclick="filtrarGruposMejorado(event, 'Programación')"><i class="fas fa-code"></i> Programación <span class="filter-count">{{ grupos|selectattr('categoria', 'equalto', 'Programación')|list|length }}</span></button>
+                    <button class="filter-chip" data-category="Electrónica" onclick="filtrarGruposMejorado(event, 'Electrónica')"><i class="fas fa-microchip"></i> Electrónica <span class="filter-count">{{ grupos|selectattr('categoria', 'equalto', 'Electrónica')|list|length }}</span></button>
+                    <button class="filter-chip" data-category="Robótica" onclick="filtrarGruposMejorado(event, 'Robótica')"><i class="fas fa-robot"></i> Robótica <span class="filter-count">{{ grupos|selectattr('categoria', 'equalto', 'Robótica')|list|length }}</span></button>
+                    <button class="filter-chip" data-category="sin-categoria" onclick="filtrarGruposMejorado(event, 'sin-categoria')"><i class="fas fa-question"></i> Sin Categoría <span class="filter-count">{{ grupos|selectattr('categoria', 'none')|list|length + grupos|selectattr('categoria', 'undefined')|list|length }}</span></button>
+                </div>
+
+                <div class="teams-grid" id="teamsGrid">
+                    {% if grupos %}
+                        {% for grupo in grupos %}
+                        <article class="team-card" data-id="{{ grupo.id }}" data-nombre="{{ grupo.nombre|lower }}" data-codigo="{{ grupo.codigo|lower if grupo.codigo else '' }}" data-categoria="{{ grupo.categoria|lower if grupo.categoria else 'sin-categoria' }}" data-proyecto="{{ 'con-proyecto' if grupo.tiene_proyecto else 'sin-proyecto' }}" data-tiene-juez="{{ 'true' if grupo.juez_nombre else 'false' }}">
+                            <div class="team-header">
+                                <div class="team-icon {{ 'con-proyecto' if grupo.tiene_proyecto else 'sin-proyecto' }}">
+                                    {% if grupo.categoria %}
+                                        {% if 'program' in grupo.categoria.lower() %}<i class="fas fa-code"></i>
+                                        {% elif 'electron' in grupo.categoria.lower() %}<i class="fas fa-microchip"></i>
+                                        {% elif 'robot' in grupo.categoria.lower() %}<i class="fas fa-robot"></i>
+                                        {% else %}<i class="fas fa-lightbulb"></i>{% endif %}
+                                    {% else %}
+                                        <i class="fas fa-question"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="team-category-badge {{ 'con-categoria' if grupo.categoria else 'sin-categoria' }}">
+                                    {{ grupo.categoria if grupo.categoria else 'Sin categoría' }}
+                                </span>
+                                <div class="team-actions-menu">
+                                    <button class="btn-icon-menu" onclick="toggleTeamMenu('{{ grupo.id }}')"><i class="fas fa-ellipsis-v"></i></button>
+                                    <div class="team-menu" id="menu-{{ grupo.id }}">
+                                        <!-- DATA-ATTRIBUTES: Usamos data-attributes para pasar los datos -->
+                                        <button 
+                                            class="btn-edit-grupo" 
+                                            data-grupo-id="{{ grupo.id }}" 
+                                            data-grupo-nombre="{{ grupo.nombre|replace("'", "\'") }}">
+                                            <i class="fas fa-edit me-2"></i>Editar
+                                        </button>
+                                        <button onclick="asignarJuezGrupo('{{ grupo.id }}')"><i class="fas fa-user-tie me-2"></i>Asignar Juez</button>
+                                        <!-- DATA-ATTRIBUTES: Usamos data-attributes para pasar los datos -->
+                                        <button 
+                                            class="danger btn-delete-grupo" 
+                                            data-grupo-id="{{ grupo.id }}" 
+                                            data-grupo-nombre="{{ grupo.nombre|replace("'", "\'") }}">
+                                            <i class="fas fa-trash me-2"></i>Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="team-title">{{ grupo.proyecto_titulo if grupo.tiene_proyecto else grupo.nombre }}</h4>
+                            
+                            <p class="team-description">
+                                {% if grupo.tiene_proyecto %}
+                                    {{ grupo.proyecto_descripcion[:80] }}...
+                                {% else %}
+                                    <span class="text-muted">Sin descripción de proyecto registrada</span>
+                                {% endif %}
+                            </p>
+
+                            <div class="team-status {{ 'con-proyecto' if grupo.tiene_proyecto else 'sin-proyecto' }}">
+                                {% if grupo.tiene_proyecto %}
+                                    <i class="fas fa-check-circle me-2"></i><span>Proyecto Registrado</span>
+                                {% else %}
+                                    <i class="fas fa-exclamation-circle me-2"></i><span>Sin proyecto registrado</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="team-info-grid">
+                                <div class="info-item"><i class="fas fa-users"></i><span>{{ grupo.num_miembros }} integrante(s)</span></div>
+                                <div class="info-item">
+                                    {% if grupo.juez_nombre %}<i class="fas fa-user-tie"></i><span>{{ grupo.juez_nombre }}</span>
+                                    {% else %}<i class="fas fa-user-slash"></i><span>Sin juez asignado</span>{% endif %}
+                                </div>
+                                <div class="info-item"><i class="fas fa-calendar"></i><span>{{ grupo.fecha_registro if grupo.fecha_registro else 'N/A' }}</span></div>
+                            </div>
+
+                            <div class="team-code">
+                                <span class="code-label">Código:</span>
+                                <code class="code-value">{{ grupo.codigo if grupo.codigo else 'N/A' }}</code>
+                                <button class="btn-copy" onclick="copiarCodigo('{{ grupo.codigo }}')" title="Copiar código"><i class="fas fa-copy"></i></button>
+                            </div>
+
+                            <div class="team-members">
+                                <h6><i class="fas fa-user-friends me-1"></i> Miembros:</h6>
+                                <div class="members-list">
+                                    {% if grupo.miembros_info %}
+                                        {% for miembro in grupo.miembros_info %}
+                                            <div class="member-item">
+                                                <span class="member-name">{{ miembro.nombre }}</span>
+                                                {% if miembro.es_lider %}<span class="member-badge lider">Líder</span>{% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="no-members">No hay miembros registrados</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-users-slash"></i>
+                            <h3>No hay equipos registrados</h3>
+                            <p>Los equipos aparecerán aquí cuando los estudiantes se registren</p>
+                            <button class="btn-add mt-3" onclick="abrirModalCrearGrupo()"><i class="fas fa-plus"></i> Crear Primer Grupo</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="tab-section {% if seccion_activa == 'evaluaciones' %}active{% endif %}" id="evaluaciones">
+                <header class="page-header">
+                    <div>
+                        <h2><i class="fas fa-clipboard-check me-2"></i>Rúbricas de Evaluación</h2>
+                        <p>Define criterios de calificación para los proyectos</p>
+                    </div>
+                    <button class="btn-add" onclick="abrirModalNuevaRubrica()"><i class="fas fa-plus"></i> Nueva Rúbrica</button>
+                </header>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Sistema de Evaluación:</strong> Se muestra el puntaje final calculado dinámicamente con la rúbrica activa (o el sistema C1/C2 de 20 puntos si la evaluación es antigua).
+                </div>
+
+                <div class="search-bar-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchEvaluaciones" class="search-input" placeholder="Buscar evaluaciones por proyecto o juez..." onkeyup="buscarEvaluaciones()">
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Proyecto</th>
+                                <th>Grupo</th>
+                                <th>Juez</th>
+                                <th>Puntuación</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evaluacionesTableBody">
+                            {% if evaluaciones %}
+                                {% for eval in evaluaciones %}
+                                <tr>
+                                    <td><strong>{{ eval.proyecto_titulo }}</strong></td>
+                                    <td>{{ eval.grupo_nombre }}</td>
+                                    <td>{{ eval.juez_nombre }}</td>
+                                    <td>
+                                        {% if eval.puntuacion_final is not none %}
+                                            <!-- Muestra la puntuación final normalizada (0-100) -->
+                                            {% set score = eval.puntuacion_final %}
+                                            <span class="badge {{ 'bg-success' if score >= 80 else 'bg-warning' if score >= 50 else 'bg-danger' }}">
+                                                {{ score | round(2) }}%
+                                            </span>
+                                            <small class="text-muted d-block">Score Final</small>
+                                        {% else %}
+                                            <!-- Fallback a la antigua lógica de 20 puntos (C1+C2) -->
+                                            {% set total_score_20 = eval.puntuacion_criterio_1 + eval.puntuacion_criterio_2 %}
+                                            <span class="badge {{ 'bg-success' if total_score_20 >= 15 else 'bg-warning' if total_score_20 >= 10 else 'bg-danger' }}">
+                                                {{ total_score_20 }}/20
+                                            </span>
+                                            <small class="text-muted d-block">C1: {{ eval.puntuacion_criterio_1 }}/10 • C2: {{ eval.puntuacion_criterio_2 }}/10</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ eval.fecha_evaluacion.strftime('%d/%m/%Y %H:%M') if eval.fecha_evaluacion else 'N/A' }}</td>
+                                    <td>
+                                        <button class="btn-icon view" onclick="verEvaluacionDetalle('{{ eval.proyecto_id }}', '{{ eval.juez_id }}')" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="empty-message">
+                                        <i class="fas fa-clipboard-list"></i>
+                                        <p>No hay evaluaciones registradas aún</p>
+                                        <small class="text-muted">Las evaluaciones aparecerán aquí cuando los jueces califiquen proyectos</small>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="rubrics-list mt-4" id="rubricasActivas">
+                    <h4><i class="fas fa-file-alt me-2"></i>Rúbrica Activa</h4>
+                    <div id="rubricaActivaContainer">
+                        <div class="text-center py-5">
+                            <i class="fas fa-spinner fa-spin fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">Cargando rúbrica...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-section {% if seccion_activa == 'registros-pendientes' %}active{% endif %}" id="registros-pendientes">
+                <header class="page-header">
+                    <div>
+                        <h2><i class="fas fa-clipboard-list me-2"></i>Registros Pendientes</h2>
+                        <p>Monitorea el estado de proyectos, evaluaciones y usuarios</p>
+                    </div>
+                </header>
+
+                <div class="pending-section">
+                    <h3><i class="fas fa-project-diagram me-2"></i>Estado de Proyectos</h3>
+                    <div class="pending-grid">
+                        <div class="pending-card red">
+                            <div class="pending-icon"><i class="fas fa-folder-open"></i></div>
+                            <div class="pending-info">
+                                <h4>{{ grupos_stats.sin_proyecto }}</h4>
+                                <p>Grupos sin Proyecto</p>
+                            </div>
+                            <button class="pending-btn" onclick="filtrarGrupos('sin-proyecto')">Ver lista</button>
+                        </div>
+                        <div class="pending-card orange">
+                            <div class="pending-icon"><i class="fas fa-clock"></i></div>
+                            <div class="pending-info">
+                                <h4>{{ proyectos|length }}</h4>
+                                <p>Proyectos sin Evaluar</p>
+                            </div>
+                            <button class="pending-btn" onclick="navigateToTab('evaluaciones')">Ver lista</button>
+                        </div>
+                        <div class="pending-card green">
+                            <div class="pending-icon"><i class="fas fa-check-double"></i></div>
+                            <div class="pending-info">
+                                <h4>{{ grupos_stats.con_juez }}</h4>
+                                <p>Proyectos con Juez</p>
+                            </div>
+                            <button class="pending-btn" onclick="filtrarGrupos('con-juez')">Ver lista</button>
+                        </div>
+                        <div class="pending-card yellow">
+                            <div class="pending-icon"><i class="fas fa-user-clock"></i></div>
+                            <div class="pending-info">
+                                <h4>{{ grupos_stats.total - grupos_stats.con_juez }}</h4>
+                                <p>Sin Juez Asignado</p>
+                            </div>
+                            <button class="pending-btn" onclick="filtrarGrupos('sin-juez')">Ver lista</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pending-section">
+                    <h3><i class="fas fa-users me-2"></i>Estado de Usuarios</h3>
+                    <div class="pending-grid">
+                        <div class="pending-card blue">
+                            <div class="pending-icon"><i class="fas fa-user-slash"></i></div>
+                            <div class="pending-info">
+                                <h4>{{ participantes|selectattr('grupo_nombre', 'equalto', 'Sin grupo')|list|length }}</h4>
+                                <p>Estudiantes sin Grupo</p>
+                            </div>
+                            <button class="pending-btn" onclick="filtrarEstudiantes('sin-grupo')">Ver lista</button>
+                        </div>
+                        <div class="pending-card purple">
+                            <div class="pending-icon"><i class="fas fa-user-tie"></i></div>
+                            <div class="pending-info">
+                                <h4>{{ jueces|length - grupos_stats.con_juez }}</h4>
+                                <p>Jueces sin Proyectos</p>
+                            </div>
+                            <button class="pending-btn" onclick="filtrarJuecesSinProyectos()">Ver lista</button>
+                        </div>
+                        <div class="pending-card teal">
+                            <div class="pending-icon"><i class="fas fa-user-friends"></i></div>
+                            <div class="pending-info">
+                                <h4>0</h4>
+                                <p>Grupos Incompletos</p>
+                            </div>
+                            <button class="pending-btn">Ver lista</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pending-section">
+                    <h3><i class="fas fa-exclamation-triangle me-2"></i>Alertas del Sistema</h3>
+                    <div class="alerts-container">
+                        {% if grupos_stats.sin_proyecto > 0 %}
+                        <div class="alert-item warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div class="alert-text"><strong>{{ grupos_stats.sin_proyecto }} grupos</strong> aún no han registrado su proyecto</div>
+                            <button class="alert-action" onclick="enviarRecordatorioProyectos()">Enviar recordatorio</button>
+                        </div>
+                        {% endif %}
+                        
+                        {% if participantes|selectattr('grupo_nombre', 'equalto', 'Sin grupo')|list|length > 0 %}
+                        <div class="alert-item warning">
+                            <i class="fas fa-user-times"></i>
+                            <div class="alert-text"><strong>{{ participantes|selectattr('grupo_nombre', 'equalto', 'Sin grupo')|list|length }} estudiantes</strong> no tienen grupo asignado</div>
+                            <button class="alert-action" onclick="navigateToTab('estudiantes')">Asignar grupos</button>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert-item info">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="alert-text"><strong>Sistema actualizado</strong> - Todos los datos están sincronizados</div>
+                        </div>
+                        
+                        {% if jueces|length < 3 %}
+                        <div class="alert-item danger">
+                            <i class="fas fa-times-circle"></i>
+                            <div class="alert-text"><strong>Pocos jueces registrados</strong> - Se recomienda tener al menos 3 jueces</div>
+                            <button class="alert-action" onclick="navigateToTab('jueces')">Agregar juez</button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-section {% if seccion_activa == 'historial' %}active{% endif %}" id="historial">
+                <header class="page-header">
+                    <div>
+                        <h2><i class="fas fa-history me-2"></i>Historial de Ferias</h2>
+                        <p>Consulta datos de años anteriores</p>
+                    </div>
+                </header>
+                <div class="empty-state">
+                    <i class="fas fa-archive" style="font-size: 4rem; color: #95a5a6; margin-bottom: 1rem;"></i>
+                    <h3>Historial en Construcción</h3>
+                    <p style="color: #7f8c8d;">Aquí podrás consultar ferias de años anteriores organizadas por año</p>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="perfilModal" aria-labelledby="perfilModalLabel" style="width: 600px;">
+    <div class="offcanvas-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #2c3e50, #1a252f); padding: 1.5rem 2.5rem; border-bottom: 4px solid #f39c12;">
+        <div>
+            <h5 class="mb-0 fw-bold" style="color: white; font-size: 1.5rem;" id="perfilModalLabel">
+                <i class="fas fa-user-circle me-2"></i>Mi Perfil
+            </h5>
+            <p class="mb-0 mt-1" style="color: rgba(255,255,255,0.8); font-size: 0.95rem;">
+                Información de tu cuenta de administrador
+            </p>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    
+    <div class="offcanvas-body p-4" style="background: #f4f6f9;">
+        
+        <div class="text-center mb-5 mt-3">
+            <div class="d-inline-block position-relative mb-3">
+                <div style="width: 120px; height: 120px; background: #152158; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; margin: 0 auto; box-shadow: 0 8px 24px rgba(21, 33, 88, 0.25); border: 5px solid white;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div style="position: absolute; bottom: 5px; right: 5px; background: #f39c12; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                    <i class="fas fa-check text-white" style="font-size: 1rem;"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">{{ session.get('user_name', 'Administrador') }}</h3>
+            <span class="badge rounded-pill px-4 py-2 mt-2" style="background-color: #152158; font-weight: 600; letter-spacing: 1px; font-size: 0.8rem; text-transform: uppercase;">
+                <i class="fas fa-shield-alt me-2"></i> ADMINISTRADOR DEL SISTEMA
+            </span>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; overflow: hidden;">
+            <div class="card-body p-4">
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-primary small text-uppercase mb-2"><i class="fas fa-envelope me-2"></i>Correo Electrónico</label>
+                    <div class="p-3 bg-light rounded-3 border d-flex align-items-center">
+                        <span class="text-dark fw-semibold" style="font-size: 1.05rem;">{{ session.get('user_id', 'admin@ugb.edu.sv') }}</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label fw-bold text-primary small text-uppercase mb-2"><i class="fas fa-id-badge me-2"></i>Rol en el Sistema</label>
+                        <div class="p-3 bg-light rounded-3 border d-flex align-items-center">
+                            <span class="text-dark fw-medium">Acceso Total (Admin)</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary small text-uppercase mb-2"><i class="fas fa-calendar-alt me-2"></i>Cuenta Creada</label>
+                        <div class="p-3 bg-light rounded-3 border d-flex align-items-center">
+                            <span class="text-muted fst-italic">No disponible</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-header bg-white border-bottom-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center mb-1">
+                    <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                            <i class="fas fa-lock text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">Seguridad y Acceso</h6>
+                        <p class="text-muted small mb-0">Actualiza tu contraseña periódicamente para proteger la cuenta</p>
+                    </div>
+                </div>
+                <hr class="mt-3 mb-0 text-muted opacity-25">
+            </div>
+            <div class="card-body px-4 pb-4 pt-3">
+                <form id="formCambiarPasswordAdmin" onsubmit="cambiarPasswordAdmin(event)">
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">Contraseña Actual</label>
+                        <div class="input-group input-group-lg">
+                            <input type="password" class="form-control fs-6" name="password_actual" id="adminCurrentPass" required placeholder="••••••" style="border-right: 0;">
+                            <button class="btn btn-outline-secondary border-start-0 bg-white text-muted" type="button" onclick="togglePassword('adminCurrentPass', this)"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Nueva Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="password_nueva" id="adminNewPass" required minlength="6" placeholder="Mínimo 6 caracteres" style="border-right: 0;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('adminNewPass', this)"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                             <label class="form-label fw-bold small text-muted">Confirmar Nueva</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="adminConfirmPass" required minlength="6" placeholder="Repite la contraseña" style="border-right: 0;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('adminConfirmPass', this)"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-3 fw-bold shadow-sm" style="background: linear-gradient(90deg, #3498db, #2980b9); border:none; border-radius: 10px; font-size: 1rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-save me-2"></i> Actualizar Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoJuez" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white;">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Crear Nuevo Juez</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formNuevoJuez" onsubmit="crearJuez(event)">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-user me-2 text-primary"></i>Nombre Completo *</label>
+                                <input type="text" class="form-control" name="nombre_completo" required placeholder="Ej: Juan Pérez García">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-envelope me-2 text-success"></i>Correo Institucional *</label>
+                                <input type="email" class="form-control" name="correo_institucional" required placeholder="Ej: juan.perez@ugb.edu.sv">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-tags me-2 text-warning"></i>Categoría Asignada *</label>
+                                <select class="form-select" name="categoria_asignada" required>
+                                    <option value="">Seleccionar categoría...</option>
+                                    <option value="Programación">Programación</option>
+                                    <option value="Electrónica">Electrónica</option>
+                                    <option value="Robótica">Robótica</option>
+                                </select>
+                                <small class="text-muted">El juez solo evaluará proyectos de esta categoría</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-key me-2 text-danger"></i>Contraseña Temporal *</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password_temporal" id="passwordTemporal" required minlength="6" placeholder="Mínimo 6 caracteres">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('passwordTemporal', this)"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <small class="text-muted">El juez usará esta contraseña para iniciar sesión</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Crear Juez</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarJuez" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Editar Juez</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditarJuez" onsubmit="guardarEdicionJuez(event)">
+                <input type="hidden" name="juez_id" id="editJuezId">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-user me-2 text-primary"></i>Nombre Completo *</label>
+                                <input type="text" class="form-control" name="nombre_completo" id="editJuezNombre" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-envelope me-2 text-success"></i>Correo Institucional</label>
+                                <input type="email" class="form-control" id="editJuezCorreo" disabled style="background: #f8f9fa;">
+                                <small class="text-muted"><i class="fas fa-lock me-1"></i>El correo no se puede modificar</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-tags me-2 text-warning"></i>Categoría Asignada *</label>
+                                <select class="form-select" name="categoria_asignada" id="editJuezCategoria" required>
+                                    <option value="">Seleccionar categoría...</option>
+                                    <option value="Programación">Programación</option>
+                                    <option value="Electrónica">Electrónica</option>
+                                    <option value="Robótica">Robótica</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-key me-2 text-danger"></i>Nueva Contraseña (opcional)</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password_nueva" id="editJuezPassword" minlength="6" placeholder="Dejar vacío para no cambiar">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('editJuezPassword', this)"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <small class="text-muted">Mínimo 6 caracteres</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoEstudiante" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #27ae60, #2ecc71); color: white;">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Crear Nuevo Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formNuevoEstudiante" onsubmit="crearEstudiante(event)">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-user me-2 text-primary"></i>Nombre *</label>
+                                <input type="text" class="form-control" name="nombre" required placeholder="Ej: Juan">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-user me-2 text-primary"></i>Apellido *</label>
+                                <input type="text" class="form-control" name="apellido" required placeholder="Ej: Pérez">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-envelope me-2 text-success"></i>Correo Electrónico *</label>
+                                <input type="email" class="form-control" name="correo" required placeholder="Ej: juan.perez@estudiante.ugb.edu.sv">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-graduation-cap me-2 text-warning"></i>Ciclo *</label>
+                                <select class="form-select" name="ciclo" required>
+                                    <option value="">Seleccionar ciclo...</option>
+                                    <option value="I">Ciclo I</option>
+                                    <option value="II">Ciclo II</option>
+                                    <option value="III">Ciclo III</option>
+                                    <option value="IV">Ciclo IV</option>
+                                    <option value="V">Ciclo V</option>
+                                    <option value="VI">Ciclo VI</option>
+                                    <option value="VII">Ciclo VII</option>
+                                    <option value="VIII">Ciclo VIII</option>
+                                    <option value="IX">Ciclo IX</option>
+                                    <option value="X">Ciclo X</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-key me-2 text-danger"></i>Contraseña *</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password" id="passwordEstudiante" required minlength="6" placeholder="Mínimo 6 caracteres">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('passwordEstudiante', this)"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-users me-2 text-info"></i>Asignar a Grupo (opcional)</label>
+                                <select class="form-select" name="grupo_id" id="grupoSelect">
+                                    <option value="">Seleccionar grupo...</option>
+                                    {% for grupo in todos_grupos %}
+                                    <option value="{{ grupo.id }}">{{ grupo.nombre }} ({{ grupo.codigo }})</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Puede asignarse después</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-2"></i>Crear Estudiante</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarEstudiante" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Editar Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditarEstudiante" onsubmit="guardarEdicionEstudiante(event)">
+                <input type="hidden" name="estudiante_id" id="editEstudianteId">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-user me-2 text-primary"></i>Nombre *</label>
+                                <input type="text" class="form-control" name="nombre" id="editEstudianteNombre" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-user me-2 text-primary"></i>Apellido *</label>
+                                <input type="text" class="form-control" name="apellido" id="editEstudianteApellido" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-envelope me-2 text-success"></i>Correo/Cuenta</label>
+                                <input type="email" class="form-control" id="editEstudianteCorreo" disabled style="background: #f8f9fa;">
+                                <small class="text-muted"><i class="fas fa-lock me-1"></i>El correo/cuenta no se puede modificar</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-graduation-cap me-2 text-warning"></i>Ciclo *</label>
+                                <select class="form-select" name="ciclo" id="editEstudianteCiclo" required>
+                                    <option value="I">Ciclo I</option>
+                                    <option value="II">Ciclo II</option>
+                                    <option value="III">Ciclo III</option>
+                                    <option value="IV">Ciclo IV</option>
+                                    <option value="V">Ciclo V</option>
+                                    <option value="VI">Ciclo VI</option>
+                                    <option value="VII">Ciclo VII</option>
+                                    <option value="VIII">Ciclo VIII</option>
+                                    <option value="IX">Ciclo IX</option>
+                                    <option value="X">Ciclo X</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 🎯 NUEVO: DROPDOWN PARA ASIGNAR GRUPO -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-users me-2 text-info"></i>Asignar a Grupo</label>
+                                <select class="form-select" name="grupo_id" id="editEstudianteGrupoId">
+                                    <option value="">Sin grupo</option>
+                                    {% for grupo in todos_grupos %}
+                                    <option value="{{ grupo.id }}">{{ grupo.nombre }} ({{ grupo.codigo }}) - {{ grupo.categoria if grupo.categoria else 'Sin categoría' }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Selecciona un grupo para asignar al estudiante</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-key me-2 text-danger"></i>Nueva Contraseña (opcional)</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password_nueva" id="editEstudiantePassword" minlength="6" placeholder="Dejar vacío para no cambiar">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('editEstudiantePassword', this)"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <small class="text-muted">Mínimo 6 caracteres</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small><strong>Nota:</strong> Al asignar un grupo, el estudiante heredará automáticamente la categoría del grupo.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVerEstudiante" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                <h5 class="modal-title"><i class="fas fa-user me-2"></i>Información del Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre Completo</label>
+                            <input type="text" class="form-control" id="verEstNombre" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Correo Electrónico</label>
+                            <input type="text" class="form-control" id="verEstCorreo" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ciclo</label>
+                            <input type="text" class="form-control" id="verEstCiclo" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fecha de Registro</label>
+                            <input type="text" class="form-control" id="verEstFecha" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Grupo Asignado</label>
+                            <div id="verEstGrupoInfo"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Categoría</label>
+                            <div id="verEstCategoria"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btnEditarEstudiante">Editar Información</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAsignarGrupo" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white;">
+                <h5 class="modal-title"><i class="fas fa-users me-2"></i>Asignar Grupo a Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formAsignarGrupo" onsubmit="asignarGrupoEstudiante(event)">
+                <input type="hidden" name="estudiante_id" id="asignarEstudianteId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estudiante</label>
+                        <input type="text" class="form-control" id="asignarEstudianteNombre" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seleccionar Grupo *</label>
+                        <select class="form-select" name="grupo_id" id="asignarGrupoSelect" required>
+                            <option value="">Seleccionar grupo...</option>
+                            {% for grupo in todos_grupos %}
+                            <option value="{{ grupo.id }}">{{ grupo.nombre }} ({{ grupo.codigo }}) - {{ grupo.categoria if grupo.categoria else 'Sin categoría' }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>El estudiante será agregado como miembro del grupo seleccionado y heredará su categoría.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Asignar Grupo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrearGrupo" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #27ae60, #2ecc71); color: white;">
+                <h5 class="modal-title"><i class="fas fa-users me-2"></i>Crear Nuevo Grupo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formCrearGrupo" onsubmit="crearGrupoDesdeAdmin(event)">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fas fa-users me-2 text-primary"></i>Nombre del Grupo *</label>
+                        <input type="text" class="form-control" name="nombre_grupo" required placeholder="Ej: Innovadores 2025">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fas fa-tag me-2 text-warning"></i>Categoría (opcional)</label>
+                        <select class="form-select" name="categoria_grupo">
+                            <option value="">Seleccionar categoría...</option>
+                            <option value="Programación">Programación</option>
+                            <option value="Electrónica">Electrónica</option>
+                            <option value="Robótica">Robótica</option>
+                        </select>
+                        <small class="text-muted">Puede asignarse después</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Se generará automáticamente un código de invitación único para el grupo.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-2"></i>Crear Grupo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarGrupo" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Grupo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditarGrupo" onsubmit="editarGrupoDesdeAdmin(event)">
+                <input type="hidden" name="grupo_id" id="editGrupoId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fas fa-users me-2 text-primary"></i>Nombre del Grupo *</label>
+                        <input type="text" class="form-control" name="nombre" id="editGrupoNombre" required>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <small>Solo puedes cambiar el nombre del grupo. Para cambiar la categoría, asigna un proyecto al grupo.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CREAR/EDITAR RÚBRICA -->
+<div class="modal fade" id="modalNuevaRubrica" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white;">
+                <h5 class="modal-title"><i class="fas fa-clipboard-check me-2"></i>Crear Nueva Rúbrica de Evaluación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formNuevaRubrica" onsubmit="crearRubrica(event)">
+                <div class="modal-body">
+                    
+                    <!-- Información General -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Instrucciones:</strong> Define los criterios de evaluación y sus porcentajes. La suma total debe ser 100%.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-heading me-2 text-primary"></i>Nombre de la Rúbrica *</label>
+                                <input type="text" class="form-control" name="nombre_rubrica" id="nombreRubrica" required placeholder="Ej: Rúbrica FLIA 2025">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i class="fas fa-calendar me-2 text-success"></i>Año</label>
+                                <input type="number" class="form-control" name="anio" id="anioRubrica" value="2025" required min="2024" max="2030">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Criterios Dinámicos -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0"><i class="fas fa-list-ol me-2"></i>Criterios de Evaluación</h6>
+                        <button type="button" class="btn btn-sm btn-success" onclick="agregarCriterio()">
+                            <i class="fas fa-plus me-1"></i> Agregar Criterio
+                        </button>
+                    </div>
+                    
+                    <div id="criteriosContainer">
+                        <!-- Los criterios se agregarán aquí dinámicamente -->
+                    </div>
+                    
+                    <!-- Suma Total -->
+                    <div class="alert alert-warning mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><strong>Total de Porcentajes:</strong></span>
+                            <span class="fs-5 fw-bold" id="totalPorcentaje">0%</span>
+                        </div>
+                        <small class="text-muted">Debe sumar exactamente 100%</small>
+                    </div>
+                    
+                    <!-- Plantilla sugerida -->
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="cargarPlantillaFLIA2024()">
+                            <i class="fas fa-magic me-1"></i> Cargar Plantilla FLIA 2024
+                        </button>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardarRubrica"><i class="fas fa-save me-2"></i>Guardar Rúbrica</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =============================================
+    // FUNCIONES PRINCIPALES
+    // =============================================
+
+    function navigateToTab(tabName) {
+        document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        const targetSection = document.getElementById(tabName);
+        const menuItem = document.querySelector(`.menu-item[data-tab="${tabName}"]`);
+        if (targetSection) targetSection.classList.add('active');
+        if (menuItem) menuItem.classList.add('active');
+        document.querySelector('.admin-main-area').scrollTo(0, 0);
+    }
+
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function() {
+            navigateToTab(this.dataset.tab);
+        });
+    });
+
+    // =============================================
+    // FUNCIONES DE BÚSQUEDA Y FILTRADO
+    // =============================================
+
+    function buscarJueces() {
+        const searchText = document.getElementById('searchJueces').value.toLowerCase();
+        const rows = document.querySelectorAll('#juecesTableBody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.empty-message')) return;
+            const nombre = row.getAttribute('data-nombre') || '';
+            const correo = row.getAttribute('data-correo') || '';
+            const categoria = row.getAttribute('data-categoria') || '';
+            if (nombre.includes(searchText) || correo.includes(searchText) || categoria.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function buscarEstudiantes() {
+        const searchText = document.getElementById('searchEstudiantes').value.toLowerCase();
+        const rows = document.querySelectorAll('#estudiantesTableBody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.empty-message')) return;
+            const nombre = row.getAttribute('data-nombre') || '';
+            const correo = row.getAttribute('data-correo') || '';
+            const grupo = row.getAttribute('data-grupo') || '';
+            const categoria = row.getAttribute('data-categoria') || '';
+            if (nombre.includes(searchText) || correo.includes(searchText) || grupo.includes(searchText) || categoria.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function buscarGruposMejorado() {
+        const searchText = document.getElementById('searchGrupos').value.toLowerCase();
+        const cards = document.querySelectorAll('.team-card');
+        let encontrados = 0;
+
+        cards.forEach(card => {
+            const nombre = card.getAttribute('data-nombre') || '';
+            const codigo = card.getAttribute('data-codigo') || '';
+            const categoria = card.getAttribute('data-categoria') || '';
+
+            if (searchText === '' ||
+                nombre.includes(searchText) ||
+                codigo.includes(searchText) ||
+                categoria.includes(searchText)) {
+                card.style.display = '';
+                encontrados++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Actualizar contador de "Todos"
+        const todosChip = document.querySelector('#filtrosGrupos .filter-chip[data-category="all"] .filter-count');
+        if (todosChip) {
+            todosChip.textContent = encontrados;
+        }
+    }
+
+    function filtrarGruposMejorado(event, categoria) {
+        // Actualizar estado de botones
+        document.querySelectorAll('#filtrosGrupos .filter-chip').forEach(chip => {
+            chip.classList.remove('active');
+        });
+        event.target.closest('.filter-chip').classList.add('active');
+
+        const searchText = document.getElementById('searchGrupos').value.toLowerCase();
+        const cards = document.querySelectorAll('.team-card');
+        let contador = 0;
+
+        cards.forEach(card => {
+            const cardCategoria = card.getAttribute('data-categoria') || '';
+            const nombre = card.getAttribute('data-nombre') || '';
+            const codigo = card.getAttribute('data-codigo') || '';
+
+            let mostrar = false;
+
+            // Primero aplicar búsqueda por texto
+            const coincideBusqueda = searchText === '' ||
+                nombre.includes(searchText) ||
+                codigo.includes(searchText);
+
+            if (!coincideBusqueda) {
+                card.style.display = 'none';
+                return;
+            }
+
+            // Luego aplicar filtro por categoría
+            if (categoria === 'all') {
+                mostrar = true;
+            } else if (categoria === 'sin-categoria') {
+                mostrar = cardCategoria === 'sin-categoria' || cardCategoria === '';
+            } else {
+                mostrar = cardCategoria === categoria.toLowerCase();
+            }
+
+            if (mostrar) {
+                card.style.display = '';
+                contador++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Actualizar contador en el botón activo
+        const activeChip = event.target.closest('.filter-chip').querySelector('.filter-count');
+        if (activeChip) {
+            activeChip.textContent = contador;
+        }
+    }
+
+    // =============================================
+    // 🎯 NUEVAS FUNCIONES AGREGADAS
+    // =============================================
+
+    /**
+     * Filtra grupos que tienen juez asignado
+     * Se activa al dar click en la stat "Con Juez Asignado"
+     */
+    function filtrarGruposConJuez() {
+        // Ir a la sección de equipos
+        navigateToTab('equipos');
+        
+        // Esperar a que se cargue la sección
+        setTimeout(() => {
+            const cards = document.querySelectorAll('.team-card');
+            let encontrados = 0;
+            
+            cards.forEach(card => {
+                const tieneJuez = card.getAttribute('data-tiene-juez') === 'true';
+                
+                if (tieneJuez) {
+                    card.style.display = '';
+                    encontrados++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            mostrarNotificacion(`Mostrando ${encontrados} grupo(s) con juez asignado`, 'info');
+        }, 300);
+    }
+
+    /**
+     * Filtra proyectos por categoría específica
+     * Se activa al dar click en las tarjetas de categoría (Programación, Electrónica, Robótica)
+     */
+    function filtrarPorCategoria(categoria) {
+        // Ir a la sección de equipos
+        navigateToTab('equipos');
+        
+        // Esperar a que se cargue la sección
+        setTimeout(() => {
+            const cards = document.querySelectorAll('.team-card');
+            let encontrados = 0;
+            
+            // Actualizar filtros en la barra de filtros
+            document.querySelectorAll('#filtrosGrupos .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.getAttribute('data-category') === categoria) {
+                    chip.classList.add('active');
+                }
+            });
+            
+            cards.forEach(card => {
+                const cardCategoria = card.getAttribute('data-categoria') || '';
+                
+                if (cardCategoria === categoria.toLowerCase()) {
+                    card.style.display = '';
+                    encontrados++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            mostrarNotificacion(`Mostrando ${encontrados} proyecto(s) de ${categoria}`, 'info');
+        }, 300);
+    }
+
+    function buscarEnDashboard() {
+        const searchText = document.getElementById('searchDashboard').value.toLowerCase();
+
+        if (searchText === '') {
+            document.querySelectorAll('.metric-card, .stat-enhanced, .category-card, .action-btn-large').forEach(el => {
+                el.style.display = '';
+            });
+            return;
+        }
+
+        document.querySelectorAll('.metric-card').forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(searchText) ? '' : 'none';
+        });
+
+        document.querySelectorAll('.stat-enhanced').forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(searchText) ? '' : 'none';
+        });
+
+        document.querySelectorAll('.category-card').forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(searchText) ? '' : 'none';
+        });
+
+        document.querySelectorAll('.action-btn-large').forEach(btn => {
+            const text = btn.textContent.toLowerCase();
+            btn.style.display = text.includes(searchText) ? '' : 'none';
+        });
+    }
+
+    // =============================================
+    // FILTRADO MEJORADO POR CATEGORÍA
+    // =============================================
+
+    function filtrarJuecesPorCategoria(categoria) {
+        document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+        event.target.classList.add('active');
+        const rows = document.querySelectorAll('#juecesTableBody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.empty-message')) return;
+            const rowCategoria = row.getAttribute('data-categoria') || '';
+            if (categoria === 'all' || rowCategoria.includes(categoria.toLowerCase())) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // CORRECCIÓN DE LA FUNCIÓN DE FILTRADO DE ESTUDIANTES
+    function filtrarEstudiantes(tipo, event) {
+        // Desactiva todos los chips excepto el que se acaba de clicar
+        document.querySelectorAll('#estudiantes .filter-chip').forEach(chip => chip.classList.remove('active'));
+        if (event && event.target.closest('.filter-chip')) {
+            event.target.closest('.filter-chip').classList.add('active');
+        } else {
+             // Fallback para activar el chip 'all' si no viene de un evento
+             const allChip = document.querySelector(`#estudiantes .filter-chip[data-category="all"]`);
+             if (allChip) allChip.classList.add('active');
+        }
+
+        const rows = document.querySelectorAll('#estudiantesTableBody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.empty-message')) return;
+            
+            // Usamos la propiedad data-grupo que ahora está en minúsculas y con guiones (ej: sin-grupo)
+            const grupoNombre = row.getAttribute('data-grupo') || ''; 
+
+            let mostrar = false;
+            
+            if (tipo === 'all') {
+                mostrar = true;
+            } else if (tipo === 'con-grupo') {
+                 // Un estudiante está 'con grupo' si el nombre del grupo NO es 'sin-grupo'
+                mostrar = grupoNombre !== 'sin-grupo' && grupoNombre !== '';
+            } else if (tipo === 'sin-grupo') {
+                 // Un estudiante está 'sin grupo' si el nombre del grupo ES 'sin-grupo' o está vacío
+                mostrar = grupoNombre === 'sin-grupo' || grupoNombre === '';
+            }
+
+            if (mostrar) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    // FIN CORRECCIÓN
+
+    // =============================================
+    // FUNCIONES DE GESTIÓN DE JUECES
+    // =============================================
+
+    function abrirModalNuevoJuez() {
+        const modal = new bootstrap.Modal(document.getElementById('modalNuevoJuez'));
+        modal.show();
+    }
+
+    function crearJuez(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const nombre = formData.get('nombre_completo');
+        const correo = formData.get('correo_institucional');
+        const password = formData.get('password_temporal');
+        const categoria = formData.get('categoria_asignada');
+
+        if (!nombre || !correo || !password || !categoria) {
+            mostrarNotificacion('Todos los campos son obligatorios', 'error');
+            return;
+        }
+
+        if (password.length < 6) {
+            mostrarNotificacion('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        
+        // Deshabilitar botón mientras se guarda
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+
+        fetch('/admin/crear-juez', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                mostrarNotificacion('Juez creado exitosamente', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                // Si hay error en el backend, intentar mostrar el error de Flask
+                response.text().then(text => {
+                    if (text.includes("flash")) {
+                        mostrarNotificacion('Error al crear juez (Verifique consola)', 'error');
+                    } else {
+                        mostrarNotificacion('Error al crear juez', 'error');
+                    }
+                });
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function editarJuez(id, nombre, correo, categoria) {
+        document.getElementById('editJuezId').value = id;
+        document.getElementById('editJuezNombre').value = nombre;
+        document.getElementById('editJuezCorreo').value = correo;
+        document.getElementById('editJuezCategoria').value = categoria || '';
+        document.getElementById('editJuezPassword').value = ''; // Limpiar contraseña
+
+        const modal = new bootstrap.Modal(document.getElementById('modalEditarJuez'));
+        modal.show();
+    }
+
+    function guardarEdicionJuez(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const nombre = formData.get('nombre_completo');
+        const categoria = formData.get('categoria_asignada');
+        const password_nueva = formData.get('password_nueva');
+
+        if (!nombre || !categoria) {
+            mostrarNotificacion('Nombre y categoría son obligatorios', 'error');
+            return;
+        }
+
+        if (password_nueva && password_nueva.length < 6) {
+            mostrarNotificacion('La nueva contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+
+        // Deshabilitar botón mientras se guarda
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+
+        fetch('/admin/editar-juez', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                mostrarNotificacion('Juez actualizado exitosamente', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                mostrarNotificacion('Error al actualizar juez', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function confirmarEliminarJuez(id, nombre) {
+        // Reemplazamos 'confirm' por un modal o una notificación con acción si fuera posible, 
+        // pero por ahora mantenemos el confirm original ya que está en tu código.
+        if (confirm(`¿Estás seguro de eliminar al juez "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+            const formData = new FormData();
+            formData.append('juez_id', id);
+            
+            // Simulación de deshabilitar/habilitar botón, ya que confirm es bloqueante
+            const row = document.querySelector(`tr[data-correo="${id.toLowerCase()}"]`);
+            if (row) { row.style.opacity = '0.5'; }
+
+            fetch('/admin/eliminar-juez', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    mostrarNotificacion('Juez eliminado exitosamente', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarNotificacion('Error al eliminar juez', 'error');
+                    if (row) { row.style.opacity = '1'; }
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión', 'error');
+                if (row) { row.style.opacity = '1'; }
+            });
+        }
+    }
+
+    // =============================================
+    // FUNCIONES DE GESTIÓN DE ESTUDIANTES
+    // =============================================
+
+    function abrirModalNuevoEstudiante() {
+        const modal = new bootstrap.Modal(document.getElementById('modalNuevoEstudiante'));
+        modal.show();
+    }
+
+    function crearEstudiante(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const nombre = formData.get('nombre');
+        const apellido = formData.get('apellido');
+        const correo = formData.get('correo');
+        const password = formData.get('password');
+        const ciclo = formData.get('ciclo');
+
+        if (!nombre || !apellido || !correo || !password || !ciclo) {
+            mostrarNotificacion('Todos los campos obligatorios deben estar llenos', 'error');
+            return;
+        }
+
+        if (password.length < 6) {
+            mostrarNotificacion('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        
+        // Deshabilitar botón mientras se guarda
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+
+        fetch('/admin/crear-estudiante', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                mostrarNotificacion('Estudiante creado exitosamente', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                mostrarNotificacion('Error al crear estudiante', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    // Función principal para poblar el modal "Ver Estudiante"
+    function verEstudiante(estudianteId) {
+        fetch(`/admin/obtener-info-estudiante/${estudianteId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const estudiante = data.estudiante;
+                    const modalVer = document.getElementById('modalVerEstudiante');
+
+                    document.getElementById('verEstNombre').value = `${estudiante.nombre} ${estudiante.apellido}`;
+                    document.getElementById('verEstCorreo').value = estudiante.correo;
+                    document.getElementById('verEstCiclo').value = estudiante.ciclo;
+                    document.getElementById('verEstFecha').value = estudiante.fecha_registro;
+
+                    const grupoInfo = document.getElementById('verEstGrupoInfo');
+                    const categoriaDiv = document.getElementById('verEstCategoria');
+                    
+                    // Limpiar el contenido anterior
+                    grupoInfo.innerHTML = '';
+                    categoriaDiv.innerHTML = '';
+                    
+                    if (estudiante.grupo) {
+                        grupoInfo.innerHTML = `
+                            <div class="grupo-detalle">
+                                <strong>${estudiante.grupo.nombre}</strong>
+                                <div class="text-muted">
+                                    <small>Código: ${estudiante.grupo.codigo}</small><br>
+                                </div>
+                            </div>
+                        `;
+                        // Se muestra la categoría del grupo en ambos lugares
+                        categoriaDiv.innerHTML = `<span class="badge categoria-badge">${estudiante.grupo.categoria || 'Sin categoría'}</span>`;
+                    } else {
+                        grupoInfo.innerHTML = '<span class="badge sin-grupo">Sin grupo asignado</span>';
+                        categoriaDiv.innerHTML = '<span class="badge sin-categoria">Sin categoría</span>';
+                    }
+
+                    // Botón para ir al modo Edición
+                    document.getElementById('btnEditarEstudiante').onclick = function() {
+                        iniciarFlujoEdicionEstudiante(estudianteId, estudiante);
+                    };
+
+                    const modal = new bootstrap.Modal(modalVer);
+                    modal.show();
+                } else {
+                    mostrarNotificacion('Error al cargar información del estudiante', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión', 'error');
+            });
+    }
+
+    function iniciarFlujoEdicionEstudiante(estudianteId, estudianteData) {
+        // Oculta el modal de ver
+        const modalVer = bootstrap.Modal.getInstance(document.getElementById('modalVerEstudiante'));
+        if (modalVer) modalVer.hide();
+
+        // Pinta los datos en el modal de edición
+        document.getElementById('editEstudianteId').value = estudianteId;
+        document.getElementById('editEstudianteNombre').value = estudianteData.nombre;
+        document.getElementById('editEstudianteApellido').value = estudianteData.apellido || '';
+        document.getElementById('editEstudianteCorreo').value = estudianteData.correo;
+        document.getElementById('editEstudianteCiclo').value = estudianteData.ciclo;
+        document.getElementById('editEstudiantePassword').value = ''; // Siempre vacío al abrir
+        
+        // 🎯 NUEVO: Pre-seleccionar el grupo actual en el dropdown
+        const grupoSelect = document.getElementById('editEstudianteGrupoId');
+        if (estudianteData.grupo && estudianteData.grupo.id) {
+            grupoSelect.value = estudianteData.grupo.id;
+        } else {
+            grupoSelect.value = ''; // Sin grupo
+        }
+        
+        // Muestra el modal de edición
+        const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarEstudiante'));
+        modalEditar.show();
+    }
+        
+    // Función de guardado de edición de estudiante
+    function guardarEdicionEstudiante(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const nombre = formData.get('nombre');
+        const apellido = formData.get('apellido');
+        const ciclo = formData.get('ciclo');
+        const grupo_id = formData.get('grupo_id');
+        const password_nueva = formData.get('password_nueva');
+
+        if (!nombre || !apellido || !ciclo) {
+            mostrarNotificacion('Nombre, Apellido y Ciclo son obligatorios.', 'error');
+            return;
+        }
+
+        if (password_nueva && password_nueva.length < 6) {
+            mostrarNotificacion('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+            return;
+        }
+        
+        // Mostrar estado de carga
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+        
+        // Enviar al backend
+        fetch('/admin/editar-estudiante-info', { 
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                mostrarNotificacion(`Estudiante ${nombre} ${apellido} actualizado correctamente.`, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                mostrarNotificacion('Error al actualizar estudiante.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function confirmarEliminarEstudiante(estudianteId, nombre) {
+        // Reemplazamos 'confirm'
+        if (confirm(`¿Estás seguro de eliminar al estudiante "${nombre}"?\n\nEsta acción NO se puede deshacer y eliminará todos sus datos.`)) {
+            const formData = new FormData();
+            formData.append('estudiante_id', estudianteId);
+            
+            fetch('/admin/eliminar-estudiante', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    mostrarNotificacion('Estudiante eliminado exitosamente', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarNotificacion('Error al eliminar estudiante', 'error');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión', 'error');
+            });
+        }
+    }
+    
+    // =============================================
+    // FUNCIONES DE GRUPOS
+    // =============================================
+
+    function toggleTeamMenu(id) {
+        const menu = document.getElementById(`menu-${id}`);
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            // Cierra todos los demás menús antes de abrir este
+            document.querySelectorAll('.team-menu').forEach(m => {
+                m.style.display = 'none';
+            });
+            menu.style.display = 'block';
+        }
+    }
+    
+    function abrirModalEditarGrupo(id, nombre) {
+        document.getElementById('editGrupoId').value = id;
+        document.getElementById('editGrupoNombre').value = nombre;
+        const modal = new bootstrap.Modal(document.getElementById('modalEditarGrupo'));
+        modal.show();
+    }
+
+    function editarGrupoDesdeAdmin(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        // Deshabilitar botón mientras se guarda
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+
+        fetch('/admin/editar-grupo', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                mostrarNotificacion('Grupo actualizado exitosamente', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                mostrarNotificacion('Error al actualizar el grupo', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function crearGrupoDesdeAdmin(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        // Deshabilitar botón mientras se crea
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
+
+        fetch('/admin/crear-grupo', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                mostrarNotificacion('Grupo creado exitosamente', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                mostrarNotificacion('Error al crear grupo', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function confirmarEliminarGrupo(grupoId, grupoNombre) {
+        // Reemplazamos 'confirm'
+        if (confirm(`¿Estás seguro de eliminar el grupo "${grupoNombre}"?\n\n⚠️ Esta acción eliminará también el proyecto asociado y no se puede deshacer.`)) {
+            const formData = new FormData();
+            formData.append('grupo_id', grupoId);
+
+            fetch('/admin/eliminar-grupo', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    mostrarNotificacion('Grupo eliminado exitosamente', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarNotificacion('Error al eliminar grupo', 'error');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión', 'error');
+            });
+        }
+    }
+
+    function abrirModalCrearGrupo() {
+        const modal = new bootstrap.Modal(document.getElementById('modalCrearGrupo'));
+        modal.show();
+    }
+    
+    // FUNCIONES DE EVALUACIONES (CONTINUACIÓN)
+
+    function buscarEvaluaciones() {
+        const searchText = document.getElementById('searchEvaluaciones').value.toLowerCase();
+        const rows = document.querySelectorAll('#evaluacionesTableBody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.empty-message')) return;
+            const proyecto = row.cells[0].textContent.toLowerCase() || '';
+            const juez = row.cells[2].textContent.toLowerCase() || '';
+            const grupo = row.cells[1].textContent.toLowerCase() || '';
+            
+            if (proyecto.includes(searchText) || juez.includes(searchText) || grupo.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+
+    function verEvaluacionDetalle(proyectoId, juezId) {
+        // Función placeholder. Debería usar AJAX para obtener detalles completos de la evaluación
+        // y de la rúbrica para mostrar los puntajes por criterio dinámicamente.
+        // Por ahora, solo muestra un mensaje.
+        mostrarNotificacion(`Cargando detalles de evaluación para Proyecto ID: ${proyectoId} por Juez ID: ${juezId}`, 'info');
+        
+        // Simulación de Modal Detalle (podrías expandir esto con una llamada fetch real)
+        const modalHTML = `
+            <div class="modal fade" id="modalDetalleEvaluacion" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                            <h5 class="modal-title"><i class="fas fa-clipboard-check me-2"></i>Detalle de Evaluación</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                **La vista detallada de evaluación por criterio requiere una llamada AJAX para obtener los datos de la subcolección \`puntuaciones_criterios\`.**
+                                <br>Proyecto ID: <strong>${proyectoId}</strong>, Juez ID: <strong>${juezId}</strong>
+                            </div>
+                            <div class="text-center py-4">
+                                <i class="fas fa-cogs fa-3x text-muted"></i>
+                                <p class="mt-2 text-muted">Implementación de detalle pendiente.</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const existingModal = document.getElementById('modalDetalleEvaluacion');
+        if (existingModal) { existingModal.remove(); }
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalDetalleEvaluacion'));
+        modal.show();
+    }
+
+    // =============================================
+    // FUNCIONES PARA REGISTROS PENDIENTES
+    // =============================================
+
+    function filtrarGrupos(tipo) {
+        navigateToTab('equipos');
+        if (tipo === 'sin-proyecto') {
+            // Filtrar grupos sin proyecto
+            const cards = document.querySelectorAll('.team-card');
+            cards.forEach(card => {
+                const tieneProyecto = card.getAttribute('data-proyecto') === 'con-proyecto';
+                card.style.display = tieneProyecto ? 'none' : '';
+            });
+            mostrarNotificacion('Mostrando grupos sin proyecto', 'info');
+        } else if (tipo === 'con-juez') {
+            // Mostrar grupos que tienen juez asignado
+            const cards = document.querySelectorAll('.team-card');
+            cards.forEach(card => {
+                const tieneJuez = card.getAttribute('data-tiene-juez') === 'true';
+                card.style.display = tieneJuez ? '' : 'none';
+            });
+            mostrarNotificacion('Mostrando grupos con juez asignado', 'info');
+        } else if (tipo === 'sin-juez') {
+            // Mostrar grupos que NO tienen juez asignado
+            const cards = document.querySelectorAll('.team-card');
+            cards.forEach(card => {
+                const tieneJuez = card.getAttribute('data-tiene-juez') === 'true';
+                card.style.display = tieneJuez ? 'none' : '';
+            });
+            mostrarNotificacion('Mostrando grupos sin juez asignado', 'info');
+        }
+        // Asegurar que el filtro en la barra de filtros se resetea o indica el estado
+        document.querySelectorAll('#filtrosGrupos .filter-chip').forEach(chip => chip.classList.remove('active'));
+    }
+
+    function filtrarJuecesSinProyectos() {
+        navigateToTab('jueces');
+        // Simulación de filtrado en la tabla de jueces
+        setTimeout(() => {
+             const rows = document.querySelectorAll('#juecesTableBody tr');
+             let encontrados = 0;
+             rows.forEach(row => {
+                 const countBadge = row.querySelector('.proyecto-count');
+                 const countText = countBadge ? countBadge.textContent.trim().split(' ')[0] : '0';
+                 if (parseInt(countText) === 0) {
+                     row.style.display = '';
+                     encontrados++;
+                 } else {
+                     row.style.display = 'none';
+                 }
+             });
+             mostrarNotificacion(`Mostrando ${encontrados} jueces sin proyectos asignados`, 'info');
+        }, 300);
+    }
+
+    function enviarRecordatorioProyectos() {
+        // Reemplazamos 'confirm'
+        if (!confirm('¿Enviar recordatorio a todos los grupos sin proyecto?\n\nSe notificará a los líderes de grupo.')) {
+            return;
+        }
+        
+        // Mostrar estado de carga
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        btn.disabled = true;
+        
+        // Simular envío
+        setTimeout(() => {
+            mostrarNotificacion('Recordatorio enviado a grupos sin proyecto', 'success');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 2000);
+    }
+
+    // =============================================
+    // FUNCIONES UTILITARIAS
+    // =============================================
+
+    function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('i');
+        
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    function copiarCodigo(codigo) {
+        if (!codigo || codigo === 'N/A') {
+            mostrarNotificacion('No hay código para copiar', 'error');
+            return;
+        }
+
+        // Usamos document.execCommand para compatibilidad en iFrames
+        const tempInput = document.createElement('input');
+        tempInput.value = codigo;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+
+        const btn = event.target.closest('.btn-copy');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.style.background = '#2ecc71';
+        btn.style.color = 'white';
+        btn.style.borderColor = '#2ecc71';
+
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 2000);
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        const iconos = {
+            'success': 'check-circle',
+            'error': 'times-circle',
+            'warning': 'exclamation-triangle',
+            'info': 'info-circle'
+        };
+        const colores = {
+            'success': 'alert-success',
+            'error': 'alert-danger',
+            'warning': 'alert-warning',
+            'info': 'alert-info'
+        };
+        const notif = document.createElement('div');
+        notif.className = `alert ${colores[tipo]}`;
+        notif.style.cssText = `position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 300px; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease;`;
+        notif.innerHTML = `<i class="fas fa-${iconos[tipo]}"></i> ${mensaje}`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4000);
+    }
+
+    // =============================================
+    // GESTIÓN DE EVENTOS DE MODALES (USANDO DELEGACIÓN)
+    // =============================================
+    
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Admin Dashboard JavaScript cargado correctamente');
+
+    // =============================================
+    // ⭐ FUNCIÓN CARGAR RÚBRICA (AHORA AQUÍ ARRIBA)
+    // =============================================
+    function cargarRubricaActiva() {
+        const container = document.getElementById('rubricaActivaContainer');
+        if (!container) {
+            console.warn('⚠️ No se encontró el contenedor');
+            return;
+        }
+        
+        console.log('🔄 Cargando rúbrica activa...');
+        
+        fetch(window.location.origin + '/admin/obtener-rubrica-activa')
+            .then(response => {
+                console.log('📦 Status:', response.status);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Datos:', data);
+                
+                if (data.success && data.rubrica) {
+                    const rubrica = data.rubrica;
+                    let criteriosHTML = '';
+                    
+                    rubrica.criterios.forEach((criterio) => {
+                        criteriosHTML += `
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle me-1 text-success"></i>
+                                <strong>${criterio.nombre}</strong> 
+                                (${criterio.porcentaje}% - ${criterio.puntos_maximos} pts)
+                                ${criterio.descripcion ? `<br><small class="text-muted ms-3">${criterio.descripcion}</small>` : ''}
+                            </li>
+                        `;
+                    });
+                    
+                    container.innerHTML = `
+                        <div class="alert alert-success">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>${rubrica.nombre} - ${rubrica.anio}</h5>
+                                <span class="badge bg-success">ACTIVA</span>
+                            </div>
+                            <p class="mb-2"><strong>Criterios (${rubrica.criterios.length}):</strong></p>
+                            <ul class="mb-0">${criteriosHTML}</ul>
+                        </div>
+                    `;
+                    console.log('✅ Rúbrica cargada');
+                } else {
+                    container.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>No hay rúbrica activa.</strong> Crea una rúbrica primero.
+                        </div>
+                    `;
+                    console.log('⚠️ No hay rúbrica activa');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Error: ${error.message}
+                    </div>
+                `;
+            });
+    }
+    
+    // ⭐ LLAMAR LA FUNCIÓN
+    cargarRubricaActiva();
+
+    const animStyle = document.createElement('style');
+    animStyle.textContent = `@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`;
+    document.head.appendChild(animStyle);
+
+    // Inicialización de navegación
+    const seccionActiva = "{{ seccion_activa }}";
+    if (seccionActiva && seccionActiva !== 'dashboard') {
+        setTimeout(() => {
+            navigateToTab(seccionActiva);
+        }, 100);
+    }
+
+    // Cierre de menús al hacer scroll
+    document.querySelector('.admin-main-area').addEventListener('scroll', function() {
+        document.querySelectorAll('.team-menu').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    });
+    
+    // DELEGACIÓN DE EVENTOS (mantén todo esto igual)
+    document.querySelector('#juecesTableBody').addEventListener('click', function(event) {
+        const button = event.target.closest('.btn-edit-juez-modal, .btn-delete-juez');
+        if (!button) return;
+        
+        const id = button.getAttribute('data-juez-id');
+        const nombre = button.getAttribute('data-juez-nombre');
+        
+        if (button.classList.contains('btn-edit-juez-modal')) {
+            const correo = button.getAttribute('data-juez-correo');
+            const categoria = button.getAttribute('data-juez-categoria');
+            editarJuez(id, nombre, correo, categoria);
+        } else if (button.classList.contains('btn-delete-juez')) {
+            confirmarEliminarJuez(id, nombre);
+        }
+    });
+
+    document.querySelector('#estudiantesTableBody').addEventListener('click', function(event) {
+        const button = event.target.closest('.btn-view-estudiante-modal, .btn-delete-estudiante');
+        if (!button) return;
+        
+        const id = button.getAttribute('data-estudiante-id');
+        const nombre = button.getAttribute('data-estudiante-nombre');
+        
+        if (button.classList.contains('btn-view-estudiante-modal')) {
+            verEstudiante(id);
+        } else if (button.classList.contains('btn-delete-estudiante')) {
+            confirmarEliminarEstudiante(id, nombre);
+        }
+    });
+
+    document.querySelector('#teamsGrid').addEventListener('click', function(event) {
+        const button = event.target.closest('.btn-edit-grupo, .btn-delete-grupo');
+        if (!button) return;
+        
+        const id = button.getAttribute('data-grupo-id');
+        const nombre = button.getAttribute('data-grupo-nombre');
+
+        if (button.classList.contains('btn-edit-grupo')) {
+            abrirModalEditarGrupo(id, nombre);
+        } else if (button.classList.contains('btn-delete-grupo')) {
+            confirmarEliminarGrupo(id, nombre);
+        }
+    });
+});
+
+
+        // Inicialización de la navegación
+        const seccionActiva = "{{ seccion_activa }}";
+        if (seccionActiva && seccionActiva !== 'dashboard') {
+            setTimeout(() => {
+                navigateToTab(seccionActiva);
+            }, 100);
+        }
+
+        // Cierre de menús al hacer scroll
+        document.querySelector('.admin-main-area').addEventListener('scroll', function() {
+            document.querySelectorAll('.team-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        });
+        
+        // --- 1. GESTIÓN DE JUECES (TABLA) ---
+        
+        document.querySelector('#juecesTableBody').addEventListener('click', function(event) {
+            const button = event.target.closest('.btn-edit-juez-modal, .btn-delete-juez');
+            if (!button) return;
+            
+            const id = button.getAttribute('data-juez-id');
+            const nombre = button.getAttribute('data-juez-nombre');
+            
+            if (button.classList.contains('btn-edit-juez-modal')) {
+                const correo = button.getAttribute('data-juez-correo');
+                const categoria = button.getAttribute('data-juez-categoria');
+                editarJuez(id, nombre, correo, categoria);
+            } else if (button.classList.contains('btn-delete-juez')) {
+                confirmarEliminarJuez(id, nombre);
+            }
+        });
+
+        // --- 2. GESTIÓN DE ESTUDIANTES (TABLA) ---
+
+        document.querySelector('#estudiantesTableBody').addEventListener('click', function(event) {
+            const button = event.target.closest('.btn-view-estudiante-modal, .btn-delete-estudiante');
+            if (!button) return;
+            
+            const id = button.getAttribute('data-estudiante-id');
+            const nombre = button.getAttribute('data-estudiante-nombre');
+            
+            if (button.classList.contains('btn-view-estudiante-modal')) {
+                // Flujo: Consulta la información completa del estudiante para poblar el modal "Ver/Editar"
+                verEstudiante(id);
+            } else if (button.classList.contains('btn-delete-estudiante')) {
+                confirmarEliminarEstudiante(id, nombre);
+            }
+        });
+
+        // --- 3. GESTIÓN DE GRUPOS (CARDS) ---
+        
+        document.querySelector('#teamsGrid').addEventListener('click', function(event) {
+            const button = event.target.closest('.btn-edit-grupo, .btn-delete-grupo');
+            if (!button) return;
+            
+            const id = button.getAttribute('data-grupo-id');
+            const nombre = button.getAttribute('data-grupo-nombre');
+
+            if (button.classList.contains('btn-edit-grupo')) {
+                abrirModalEditarGrupo(id, nombre);
+            } else if (button.classList.contains('btn-delete-grupo')) {
+                confirmarEliminarGrupo(id, nombre);
+            }
+        });
+  
+
+// =============================================
+// FUNCIONES DE GESTIÓN DE RÚBRICAS (MODAL)
+// =============================================
+
+let contadorCriterios = 0;
+
+function abrirModalNuevaRubrica() {
+    contadorCriterios = 0;
+    document.getElementById('criteriosContainer').innerHTML = '';
+    document.getElementById('nombreRubrica').value = 'Rúbrica FLIA 2025';
+    document.getElementById('anioRubrica').value = new Date().getFullYear();
+    
+    // Agregar un criterio inicial
+    agregarCriterio();
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalNuevaRubrica'));
+    modal.show();
+}
+
+function agregarCriterio() {
+    contadorCriterios++;
+    const container = document.getElementById('criteriosContainer');
+    
+    const criterioHTML = `
+        <div class="card mb-3 criterion-item" id="criterio-${contadorCriterios}">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Nombre del Criterio</label>
+                        <input type="text" class="form-control criterio-nombre" name="criterios[${contadorCriterios}][nombre]" 
+                               placeholder="Ej: Innovación" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Porcentaje (%)</label>
+                        <input type="number" class="form-control criterio-porcentaje" name="criterios[${contadorCriterios}][porcentaje]" 
+                               placeholder="20" required min="1" max="100" onchange="calcularTotalPorcentaje()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Puntos</label>
+                        <input type="number" class="form-control criterio-puntos" name="criterios[${contadorCriterios}][puntos_max]" 
+                               placeholder="10" required min="1" max="100" value="10">
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <label class="form-label fw-bold">&nbsp;</label>
+                        <button type="button" class="btn btn-danger btn-sm w-100" onclick="eliminarCriterio(${contadorCriterios})" title="Eliminar criterio">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Descripción (opcional)</label>
+                        <textarea class="form-control" name="criterios[${contadorCriterios}][descripcion]" 
+                                 rows="2" placeholder="Describe qué se evalúa en este criterio..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', criterioHTML);
+    calcularTotalPorcentaje();
+}
+
+function eliminarCriterio(id) {
+    const criterio = document.getElementById(`criterio-${id}`);
+    if (criterio) {
+        criterio.remove();
+        calcularTotalPorcentaje();
+    }
+}
+
+function calcularTotalPorcentaje() {
+    const porcentajes = document.querySelectorAll('.criterio-porcentaje');
+    let total = 0;
+    
+    porcentajes.forEach(input => {
+        const valor = parseFloat(input.value) || 0;
+        total += valor;
+    });
+    
+    const totalElement = document.getElementById('totalPorcentaje');
+    totalElement.textContent = total.toFixed(2) + '%'; // Usar toFixed(2) para mejor precisión
+    
+    // Cambiar color según si está correcto o no
+    if (Math.round(total) === 100) { // Redondear para evitar problemas de punto flotante (e.g., 99.99999999999999%)
+        totalElement.className = 'fs-5 fw-bold text-success';
+    } else {
+        totalElement.className = 'fs-5 fw-bold text-danger';
+    }
+    
+    // Habilitar/deshabilitar botón de guardar
+    const btnGuardar = document.getElementById('btnGuardarRubrica');
+    if (Math.round(total) === 100) {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Rúbrica';
+    } else {
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Total debe ser 100%';
+    }
+}
+
+function cargarPlantillaFLIA2024() {
+    // Reemplazamos 'confirm'
+    if (!confirm('¿Estás seguro de cargar la plantilla FLIA 2024? Esto reemplazará los criterios actuales.')) {
+        return;
+    }
+    
+    // Limpiar criterios existentes
+    document.getElementById('criteriosContainer').innerHTML = '';
+    contadorCriterios = 0;
+    
+    // Plantilla FLIA 2024
+    const plantilla = [
+        { nombre: 'Innovación', porcentaje: 20, puntos: 10, descripcion: 'Originalidad y creatividad en la solución propuesta' },
+        { nombre: 'Visión Empresarial', porcentaje: 10, puntos: 10, descripcion: 'Potencial comercial y viabilidad del proyecto' },
+        { nombre: 'Expresión Verbal', porcentaje: 10, puntos: 10, descripcion: 'Claridad y calidad de la presentación oral' },
+        { nombre: 'Principio de Funcionamiento - Conocimiento Teórico', porcentaje: 15, puntos: 10, descripcion: 'Comprensión técnica y fundamentos teóricos' },
+        { nombre: 'Presentación', porcentaje: 10, puntos: 10, descripcion: 'Calidad visual y organización de la presentación' },
+        { nombre: 'Aplicación', porcentaje: 20, puntos: 10, descripcion: 'Utilidad práctica y solución a problemas reales' },
+        { nombre: 'Creatividad', porcentaje: 15, puntos: 10, descripcion: 'Enfoque único y pensamiento innovador' }
+    ];
+    
+    plantilla.forEach(criterio => {
+        contadorCriterios++;
+        const container = document.getElementById('criteriosContainer');
+        
+        const criterioHTML = `
+            <div class="card mb-3 criterio-item" id="criterio-${contadorCriterios}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nombre del Criterio</label>
+                            <input type="text" class="form-control criterio-nombre" name="criterios[${contadorCriterios}][nombre]" 
+                                   value="${criterio.nombre}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Porcentaje (%)</label>
+                            <input type="number" class="form-control criterio-porcentaje" name="criterios[${contadorCriterios}][porcentaje]" 
+                                   value="${criterio.porcentaje}" required min="1" max="100" onchange="calcularTotalPorcentaje()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Puntos</label>
+                            <input type="number" class="form-control criterio-puntos" name="criterios[${contadorCriterios}][puntos_max]" 
+                                   value="${criterio.puntos}" required min="1" max="100">
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <button type="button" class="btn btn-danger btn-sm w-100" onclick="eliminarCriterio(${contadorCriterios})" title="Eliminar criterio">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Descripción (opcional)</label>
+                            <textarea class="form-control" name="criterios[${contadorCriterios}][descripcion]" 
+                                     rows="2">${criterio.descripcion}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', criterioHTML);
+    });
+    
+    calcularTotalPorcentaje();
+    mostrarNotificacion('Plantilla FLIA 2024 cargada correctamente', 'success');
+}
+
+function crearRubrica(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Validar que el total sea 100%
+    const totalElement = document.getElementById('totalPorcentaje');
+    const totalActual = parseFloat(totalElement.textContent.replace('%', ''));
+    
+    if (Math.round(totalActual) !== 100) {
+        mostrarNotificacion('El total de porcentajes debe ser exactamente 100%', 'error');
+        return;
+    }
+    
+    // Deshabilitar botón mientras se guarda
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+    
+    fetch('/admin/crear-rubrica', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            mostrarNotificacion('Rúbrica creada exitosamente', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            // Manejar errores de validación de Flask (ej. el flash message)
+            response.text().then(text => {
+                mostrarNotificacion('Error al crear la rúbrica (Verifique consola)', 'error');
+                console.error("Respuesta del servidor:", text);
+            });
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error de conexión', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+</script>
+
+<style>
+    /* Estilos incrustados originales */
+    .user-avatar-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin: 0 auto;
+    }
+
+    .profile-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .info-item label {
+        font-weight: 600;
+        color: #2c3e50;
+        min-width: 120px;
+    }
+
+    .info-item span {
+        color: #7f8c8d;
+    }
+
+    .badge.sin-grupo {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .grupo-info {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+
+    .team-icon.con-proyecto {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+    }
+
+    .team-icon.sin-proyecto {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+
+    .team-category-badge.con-categoria {
+        background: #3498db;
+        color: white;
+    }
+
+    .team-category-badge.sin-categoria {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .team-status.con-proyecto {
+        background: #d5f4e6;
+        color: #27ae60;
+        border: 1px solid #2ecc71;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .team-status.sin-proyecto {
+        background: #fdedec;
+        color: #e74c3c;
+        border: 1px solid #e74c3c;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .team-actions-menu {
+        position: relative;
+    }
+
+    .team-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 100;
+        min-width: 150px;
+    }
+
+    .team-menu button {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .team-menu button:hover {
+        background: #f8f9fa;
+    }
+
+    .team-menu button.danger {
+        color: #e74c3c;
+    }
+
+    .team-menu button.danger:hover {
+        background: #fdedec;
+    }
+
+    .team-members {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .members-list {
+        max-height: 120px;
+        overflow-y: auto;
+    }
+
+    .member-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        margin-bottom: 0.25rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .member-badge.lider {
+        background: #f39c12;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .no-members {
+        text-align: center;
+        color: #95a5a6;
+        font-style: italic;
+        padding: 1rem;
+    }
+
+    .badge.con-proyectos {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+    }
+
+    .badge.sin-proyectos {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        color: white;
+    }
+
+    .grupo-detalle {
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 6px;
+        border-left: 3px solid #3498db;
+    }
+
+    /* 🎯 ESTILOS PARA FLECHAS MINI EN STATS ENHANCED */
+    .stat-arrow-mini {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        margin-left: auto;
+        transition: transform 0.3s, background 0.3s;
+    }
+
+    .stat-arrow-mini i {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .stat-enhanced:hover .stat-arrow-mini {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateX(4px);
+    }
+
+    .stat-enhanced.clickable {
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-enhanced.clickable:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    /* 🎯 ESTILOS PARA ELEMENTOS CLICKEABLES */
+    .category-card.clickable {
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .category-card.clickable:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .category-card.clickable:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}

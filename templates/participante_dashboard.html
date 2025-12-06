@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Participante{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Sidebar Lateral -->
+    <div class="sidebar-lateral">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='UGB_LOGOTIPO_HORIZONTAL.webp') }}" 
+                 alt="Logo UGB" 
+                 class="sidebar-logo-horizontal">
+            <h4>FLIA UGB</h4>
+            <p>Feria de Logros</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <!-- Inicio -->
+            <div class="menu-item active" onclick="showPage('inicio')">
+                <i class="fas fa-home"></i>
+                <span>Inicio</span>
+            </div>
+            
+            <!-- Mi Grupo / Crear Grupo (dinámico según tenga o no grupo) -->
+            {% if not grupo %}
+            <div class="menu-item" onclick="showPage('crear-unirse-grupo')">
+                <i class="fas fa-user-plus"></i>
+                <span>Crear/Unirse a Grupo</span>
+                <span class="badge bg-warning">Nuevo</span>
+            </div>
+            {% else %}
+            <div class="menu-item" onclick="showPage('mi-grupo')">
+                <i class="fas fa-users"></i>
+                <span>Mi Grupo</span>
+                {% if grupo.es_lider %}
+                <span class="badge bg-warning">Líder</span>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Proyectos (bloqueado si no tiene grupo) -->
+            {% if grupo %}
+            <div class="menu-item" onclick="showPage('proyectos')">
+                <i class="fas fa-folder-open"></i>
+                <span>Mis Proyectos</span>
+            </div>
+            {% else %}
+            <div class="menu-item disabled" title="Primero debes tener un grupo">
+                <i class="fas fa-folder-open"></i>
+                <span>Mis Proyectos</span>
+                <i class="fas fa-lock ms-auto"></i>
+            </div>
+            {% endif %}
+            
+            <!-- Ver Todos los Grupos -->
+            <div class="menu-item" onclick="showPage('ver-grupos')">
+                <i class="fas fa-eye"></i>
+                <span>Ver Grupos</span>
+            </div>
+            
+            <!-- Rúbricas -->
+            <div class="menu-item" onclick="showPage('rubricas')">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Criterios de Evaluación</span>
+            </div>
+            
+            <!-- Top 3 -->
+            <div class="menu-item" onclick="showPage('top3')">
+                <i class="fas fa-trophy"></i>
+                <span>Top 3</span>
+            </div>
+            
+            <!-- Historial -->
+            <div class="menu-item" onclick="showPage('historial')">
+                <i class="fas fa-history"></i>
+                <span>Historial</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="main-content-area">
+        
+        <!-- PÁGINA: INICIO -->
+        <div class="content-page active" id="page-inicio">
+            <div class="page-header">
+                <h1>¡Hola, {{ user_name }}! 👋</h1>
+                <p>Bienvenido/a a tu panel de gestión de proyectos FLIA</p>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="dash-card card-blue">
+                    <div class="dash-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>{% if grupo %}1{% else %}0{% endif %}</h3>
+                    <p>{% if grupo %}Grupo Creado{% else %}Sin Grupo{% endif %}</p>
+                </div>
+
+                <div class="dash-card card-yellow">
+                    <div class="dash-card-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <h3>{% if proyecto %}1{% else %}0{% endif %}</h3>
+                    <p>{% if proyecto %}Proyecto Registrado{% else %}Sin Proyecto{% endif %}</p>
+                </div>
+
+                <div class="dash-card card-green">
+                    <div class="dash-card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>{% if proyecto %}{{ proyecto.promedio_score|round(1) }}{% else %}--{% endif %}</h3>
+                    <p>Calificación Promedio</p>
+                </div>
+            </div>
+
+            {% if not grupo %}
+            <div class="content-card">
+                <h3><i class="fas fa-rocket me-2"></i>¡Comienza Tu Aventura!</h3>
+                <p class="mb-4">Para participar en la Feria de Logros, primero debes crear o unirte a un grupo de trabajo.</p>
+                <button class="btn btn-modern btn-primary-custom me-2" onclick="showPage('crear-unirse-grupo')">
+                    <i class="fas fa-plus me-2"></i>Crear Mi Grupo
+                </button>
+                <button class="btn btn-modern btn-warning-custom" onclick="showPage('crear-unirse-grupo')">
+                    <i class="fas fa-sign-in-alt me-2"></i>Unirme a un Grupo
+                </button>
+            </div>
+            {% else %}
+            <div class="content-card">
+                <h3><i class="fas fa-lightbulb me-2"></i>Estado de Tu Proyecto</h3>
+                {% if proyecto %}
+                <div class="row">
+                    <div class="col-md-8">
+                        <p><strong>Título:</strong> {{ proyecto.titulo }}</p>
+                        <p><strong>Categoría:</strong> <span class="badge-cat">{{ proyecto.categoria }}</span></p>
+                        <p><strong>Descripción:</strong> {{ proyecto.resumen[:100] }}...</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        {% if grupo.es_lider %}
+                        <button class="btn btn-modern btn-primary-custom" onclick="showPage('proyectos')">
+                            <i class="fas fa-edit me-2"></i>Editar Proyecto
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    {% if grupo.es_lider %}
+                    <strong>Atención:</strong> Aún no has creado un proyecto. ¡Crea uno ahora!
+                    <button class="btn btn-sm btn-warning mt-2" onclick="showPage('proyectos')">
+                        <i class="fas fa-plus me-2"></i>Crear Proyecto
+                    </button>
+                    {% else %}
+                    <strong>Información:</strong> El líder de tu grupo aún no ha creado el proyecto.
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- PÁGINA: CREAR/UNIRSE A GRUPO -->
+        <div class="content-page" id="page-crear-unirse-grupo">
+            <div class="page-header">
+                <h1><i class="fas fa-users me-3"></i>Crear o Unirse a un Grupo</h1>
+                <p>Elige si quieres crear tu propio equipo o unirte a uno existente</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card">
+                        <div class="text-center mb-4">
+                            <div class="icon-circle mx-auto mb-3">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <h3>Crear Nuevo Grupo</h3>
+                            <p>Conviértete en el líder de tu equipo</p>
+                        </div>
+                        <form method="POST" action="{{ url_for('crear_grupo') }}">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nombre del Grupo</label>
+                                <input type="text" name="nombre_grupo" class="form-control form-control-lg" placeholder="Ej: Innovadores UGB" required>
+                                <small class="text-muted">Este será el nombre oficial de tu equipo</small>
+                            </div>
+                            <button type="submit" class="btn btn-modern btn-primary-custom w-100 btn-lg">
+                                <i class="fas fa-check me-2"></i>Crear Mi Grupo
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card">
+                        <div class="text-center mb-4">
+                            <div class="icon-circle mx-auto mb-3">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </div>
+                            <h3>Unirse a un Grupo</h3>
+                            <p>Ingresa el código de invitación</p>
+                        </div>
+                        <form method="POST" action="{{ url_for('unirse_grupo') }}">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Código de Invitación</label>
+                                <input type="text" name="codigo_grupo" class="form-control form-control-lg text-center" placeholder="ABC123XYZ" style="letter-spacing: 3px; font-family: monospace;" required>
+                                <small class="text-muted">Pídele el código al líder de tu equipo</small>
+                            </div>
+                            <button type="submit" class="btn btn-modern btn-warning-custom w-100 btn-lg">
+                                <i class="fas fa-arrow-right me-2"></i>Unirme al Grupo
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA: MI GRUPO -->
+        <div class="content-page" id="page-mi-grupo">
+            <div class="page-header">
+                <h1><i class="fas fa-users me-3"></i>Mi Grupo</h1>
+                <p>Información y miembros de tu equipo</p>
+            </div>
+
+            {% if grupo %}
+            <div class="content-card">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h3>{{ grupo.nombre }}</h3>
+                        <p><strong>Líder:</strong> {{ grupo.lider_nombre }}</p>
+                        <p><strong>Total de Miembros:</strong> {{ grupo.miembros|length }} / 5</p>
+                    </div>
+                    {% if grupo.es_lider %}
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                            <i class="fas fa-crown me-2"></i>Eres el Líder
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if grupo.es_lider %}
+                <div class="code-box">
+                    <p class="mb-2"><i class="fas fa-key me-2"></i><strong>Código de Invitación</strong></p>
+                    <div class="code-value">{{ grupo.codigo }}</div>
+                    <small>Comparte este código con tus compañeros de equipo</small>
+                    <button class="btn btn-sm btn-light mt-3" onclick="copiarCodigo('{{ grupo.codigo }}')">
+                        <i class="fas fa-copy me-2"></i>Copiar Código
+                    </button>
+                </div>
+                {% endif %}
+
+                <h5 class="mt-4 mb-3"><i class="fas fa-list me-2"></i>Integrantes del Equipo:</h5>
+                <div class="list-group">
+                    {% for miembro in grupo.miembros %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-user-circle me-2 text-primary"></i>
+                            <strong>{{ miembro.nombre }}</strong>
+                        </div>
+                        {% if miembro.es_lider %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-crown me-1"></i>Líder
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary">Miembro</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- PÁGINA: PROYECTOS -->
+        <div class="content-page" id="page-proyectos">
+            <div class="page-header">
+                <h1><i class="fas fa-folder-open me-3"></i>Gestión de Proyectos</h1>
+                <p>Crea y administra el proyecto de tu equipo</p>
+            </div>
+
+            {% if grupo and grupo.es_lider %}
+            <div class="content-card">
+                <h3><i class="fas fa-edit me-2"></i>{{ 'Editar' if proyecto else 'Crear Nuevo' }} Proyecto</h3>
+                <hr>
+                <form method="POST" action="{{ url_for('registrar_proyecto') }}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nombre del Equipo</label>
+                            <input type="text" class="form-control" value="{{ grupo.nombre }}" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nombre del Proyecto *</label>
+                            <input type="text" name="titulo" class="form-control" value="{{ proyecto.titulo if proyecto else '' }}" placeholder="Ej: Sistema Inteligente de Gestión" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Categoría *</label>
+                        <select name="categoria" class="form-select form-select-lg" required>
+                            <option value="">-- Seleccione una categoría --</option>
+                            <option value="Programación" {{ 'selected' if proyecto and proyecto.categoria == 'Programación' else '' }}>💻 Programación</option>
+                            <option value="Electrónica" {{ 'selected' if proyecto and proyecto.categoria == 'Electrónica' else '' }}>⚡ Electrónica</option>
+                            <option value="Robótica" {{ 'selected' if proyecto and proyecto.categoria == 'Robótica' else '' }}>🤖 Robótica</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción del Proyecto *</label>
+                        <textarea name="resumen" class="form-control" rows="6" placeholder="Describe los objetivos, metodología y resultados esperados del proyecto..." required>{{ proyecto.resumen if proyecto else '' }}</textarea>
+                        <small class="text-muted">Máximo 500 palabras</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Imagen del Proyecto</label>
+                            <input type="file" name="imagen_proyecto" class="form-control" accept="image/*">
+                            <small class="text-muted">JPG, PNG (máx 5MB)</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Archivo del Proyecto (PDF/ZIP)</label>
+                            <input type="file" name="archivo_proyecto" class="form-control" accept=".pdf,.zip">
+                            <small class="text-muted">Documento o presentación</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <button type="submit" class="btn btn-modern btn-primary-custom btn-lg">
+                        <i class="fas fa-save me-2"></i>{{ 'Actualizar' if proyecto else 'Crear' }} Proyecto
+                    </button>
+                </form>
+            </div>
+            {% elif not grupo %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Atención:</strong> Primero debes crear o unirte a un grupo para poder gestionar proyectos.
+                <button class="btn btn-sm btn-warning mt-2" onclick="showPage('crear-unirse-grupo')">
+                    <i class="fas fa-arrow-right me-2"></i>Ir a Crear/Unirse a Grupo
+                </button>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Información:</strong> Solo el líder del grupo puede crear y editar proyectos.
+            </div>
+            {% if proyecto %}
+            <div class="content-card">
+                <h3><i class="fas fa-eye me-2"></i>Proyecto del Equipo (Vista)</h3>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Nombre del Equipo</label>
+                        <p class="form-control-plaintext">{{ grupo.nombre }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Nombre del Proyecto</label>
+                        <p class="form-control-plaintext">{{ proyecto.titulo }}</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Categoría</label>
+                    <p><span class="badge-cat">{{ proyecto.categoria }}</span></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Descripción</label>
+                    <p class="form-control-plaintext">{{ proyecto.resumen }}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- PÁGINA: VER GRUPOS -->
+        <div class="content-page" id="page-ver-grupos">
+            <div class="page-header">
+                <h1><i class="fas fa-eye me-3"></i>Todos los Grupos Participantes</h1>
+                <p>Explora los equipos registrados en la feria</p>
+            </div>
+
+            <div class="groups-display">
+                {% if todos_grupos %}
+                    {% for g in todos_grupos %}
+                    <div class="group-item">
+                        <h5>{{ g.nombre }}</h5>
+                        <p class="meta"><i class="fas fa-user me-2"></i>{{ g.miembros|length }} integrantes</p>
+                        <span class="badge-cat">{{ g.categoria if g.categoria else 'Sin categoría' }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Aún no hay grupos registrados en el sistema.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ⭐ PÁGINA: RÚBRICAS (ACTUALIZADA CON CARGA DINÁMICA) -->
+        <div class="content-page" id="page-rubricas">
+            <div class="page-header">
+                <h1><i class="fas fa-clipboard-list me-3"></i>Criterios de Evaluación</h1>
+                <p>Conoce cómo será calificado tu proyecto</p>
+            </div>
+
+            <div class="content-card">
+                <div id="rubricaParticipanteContainer">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fs-1 text-muted"></i>
+                        <p class="text-muted mt-3">Cargando criterios de evaluación...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA: TOP 3 -->
+        <div class="content-page" id="page-top3">
+            <div class="page-header">
+                <h1><i class="fas fa-trophy me-3"></i>Top 3 - Ranking</h1>
+                <p>Los mejores proyectos del año</p>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                El ranking se actualizará automáticamente cuando los jueces completen sus evaluaciones.
+            </div>
+        </div>
+
+        <!-- PÁGINA: HISTORIAL -->
+        <div class="content-page" id="page-historial">
+            <div class="page-header">
+                <h1><i class="fas fa-history me-3"></i>Historial de Ganadores</h1>
+                <p>Proyectos destacados de ediciones anteriores</p>
+            </div>
+
+            <div class="content-card">
+                <h3><i class="fas fa-star me-2"></i>Ganadores de Años Pasados</h3>
+                <p>Conoce los proyectos que han dejado huella en ferias anteriores y que han sido reconocidos por su excelencia.</p>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    El historial completo estará disponible próximamente.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function showPage(pageName) {
+    document.querySelectorAll('.content-page').forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    document.getElementById('page-' + pageName).classList.add('active');
+    
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    document.querySelector('.main-content-area').scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function copiarCodigo(codigo) {
+    navigator.clipboard.writeText(codigo).then(function() {
+        alert('¡Código copiado al portapapeles!');
+    });
+}
+
+// ⭐ CARGAR RÚBRICA PARA PARTICIPANTE
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔄 Cargando rúbrica para participante...');
+    
+    function cargarRubricaParticipante() {
+        const container = document.getElementById('rubricaParticipanteContainer');
+        if (!container) {
+            console.warn('⚠️ No se encontró el contenedor de rúbrica');
+            return;
+        }
+        
+        fetch(window.location.origin + '/participante/obtener-rubrica-activa')
+            .then(response => {
+                console.log('📦 Status:', response.status);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Datos:', data);
+                
+                if (data.success && data.rubrica) {
+                    const rubrica = data.rubrica;
+                    let criteriosHTML = '';
+                    
+                    rubrica.criterios.forEach((criterio, index) => {
+                        criteriosHTML += `
+                            <div class="criterio-card-participante mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="criterio-numero-participante">${index + 1}</span>
+                                        <strong class="ms-3 fs-5">${criterio.nombre}</strong>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-primary fs-6 me-2">${criterio.porcentaje}%</span>
+                                        <span class="badge bg-secondary fs-6">${criterio.puntos_maximos} pts</span>
+                                    </div>
+                                </div>
+                                ${criterio.descripcion ? `<p class="text-muted mb-0 ms-5">${criterio.descripcion}</p>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = `
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Sistema de Evaluación:</strong> Tu proyecto será evaluado con <strong>${rubrica.criterios.length} criterios</strong>. La calificación final es sobre 100%.
+                        </div>
+                        
+                        <h5 class="mb-4"><i class="fas fa-list-ol me-2 text-primary"></i>Criterios de Evaluación - ${rubrica.nombre}</h5>
+                        
+                        ${criteriosHTML}
+                        
+                        <div class="alert alert-success mt-4">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Consejo:</strong> Asegúrate de que tu proyecto destaque en todos los criterios para obtener la mejor calificación.
+                        </div>
+                    `;
+                    console.log('✅ Rúbrica cargada para participante');
+                } else {
+                    container.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>No hay criterios de evaluación definidos aún.</strong>
+                            <p class="mb-0 mt-2">Los administradores están configurando el sistema de evaluación. Vuelve más tarde.</p>
+                        </div>
+                    `;
+                    console.log('⚠️ No hay rúbrica activa');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Error al cargar criterios:</strong> ${error.message}
+                    </div>
+                `;
+            });
+    }
+    
+    cargarRubricaParticipante();
+});
+</script>
+
+<style>
+/* Estilos para las tarjetas de criterios */
+.criterio-card-participante {
+    padding: 1.25rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transition: all 0.3s ease;
+}
+
+.criterio-card-participante:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+    border-color: #9b59b6;
+}
+
+.criterio-numero-participante {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,606 @@
+/* ============================================================================
+   VARIABLES GLOBALES Y RESET - DISEÑO EVALUACIÓN
+   ============================================================================ */
+:root {
+    /* Colores principales de evaluación */
+    --primary-blue: #4361ee;
+    --primary-dark-blue: #3a56d4;
+    --evaluated-green: #06d6a0;
+    --pending-orange: #ff9e00;
+    --warning-yellow: #ffd166;
+    --danger-red: #ef476f;
+    
+    /* Categorías de proyectos */
+    --programacion: #4361ee;
+    --robotica: #7209b7;
+    --electronica: #f72585;
+    --ingenieria: #4cc9f0;
+    
+    /* Fondos y texturas */
+    --card-bg: #ffffff;
+    --sidebar-bg: #1a1d28;
+    --hover-bg: #f8fafc;
+    --border-color: #e2e8f0;
+    
+    /* Sombras */
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-navbar: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    /* Bordes */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f5f7ff 0%, #f0f2ff 100%);
+    color: #2d3748;
+    min-height: 100vh;
+}
+
+/* ============================================================================
+   NAVBAR SUPERIOR - ESTILO EVALUADOR
+   ============================================================================ */
+.navbar-evaluador {
+    background: linear-gradient(135deg, #1a1d28 0%, #2d3748 100%);
+    padding: 0.8rem 0;
+    box-shadow: var(--shadow-navbar);
+    border-bottom: 3px solid var(--primary-blue);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon-evaluador {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-blue);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.navbar-title h3 {
+    color: white;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 0;
+}
+
+.navbar-title small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+}
+
+/* Categoría del juez */
+.categoria-juez {
+    background: linear-gradient(135deg, var(--primary-blue), #3a0ca3);
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+}
+
+/* Botón de usuario */
+.btn-evaluador {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-evaluador:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+   PANEL DE ESTADÍSTICAS - TARJETAS EVALUACIÓN
+   ============================================================================ */
+.stats-container {
+    padding: 1.5rem 0;
+}
+
+.stat-card-evaluacion {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    height: 100%;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-evaluacion:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-card-evaluacion::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--card-color);
+}
+
+.stat-card-blue::before { background: var(--primary-blue); }
+.stat-card-green::before { background: var(--evaluated-green); }
+.stat-card-orange::before { background: var(--pending-orange); }
+.stat-card-purple::before { background: var(--programacion); }
+
+.stat-icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--icon-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--icon-color);
+}
+
+.stat-card-blue .stat-icon-circle {
+    background: rgba(67, 97, 238, 0.1);
+    color: var(--primary-blue);
+}
+
+.stat-card-green .stat-icon-circle {
+    background: rgba(6, 214, 160, 0.1);
+    color: var(--evaluated-green);
+}
+
+.stat-card-orange .stat-icon-circle {
+    background: rgba(255, 158, 0, 0.1);
+    color: var(--pending-orange);
+}
+
+.stat-card-purple .stat-icon-circle {
+    background: rgba(114, 9, 183, 0.1);
+    color: var(--robotica);
+}
+
+.stat-number-lg {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.5rem 0;
+    color: var(--card-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   FILTROS ESTILO CHIP
+   ============================================================================ */
+.filters-section {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-card);
+    margin: 1.5rem 0;
+}
+
+.filter-chip-group {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-chip {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 30px;
+    padding: 0.6rem 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+}
+
+.filter-chip.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+}
+
+.filter-chip i {
+    font-size: 0.9rem;
+}
+
+.filter-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ============================================================================
+   LISTA DE GRUPOS/PROYECTOS - DISEÑO TIPO TARJETA EVALUACIÓN
+   ============================================================================ */
+.proyectos-header {
+    margin: 2rem 0 1.5rem 0;
+}
+
+.proyectos-header h4 {
+    color: #2d3748;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.proyectos-header p {
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+.proyectos-count {
+    background: var(--primary-blue);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* ============================================================================
+   TARJETA DE PROYECTO - DISEÑO EVALUACIÓN
+   ============================================================================ */
+.proyecto-card-evaluacion {
+    background: white;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    height: 100%;
+}
+
+.proyecto-card-evaluacion:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary-blue);
+}
+
+/* Header de la tarjeta */
+.card-header-evaluacion {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.grupo-id {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.id-badge {
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Código de grupo */
+.grupo-codigo {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Categoría del proyecto */
+.categoria-badge {
+    background: var(--categoria-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Body de la tarjeta */
+.card-body-evaluacion {
+    padding: 1.5rem;
+}
+
+.equipo-nombre {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.proyecto-titulo {
+    color: #4a5568;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* Estado de evaluación */
+.estado-evaluacion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+.estado-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.estado-pendiente {
+    background: rgba(255, 158, 0, 0.1);
+    color: var(--pending-orange);
+    border: 1px solid rgba(255, 158, 0, 0.3);
+}
+
+.estado-evaluado {
+    background: rgba(6, 214, 160, 0.1);
+    color: var(--evaluated-green);
+    border: 1px solid rgba(6, 214, 160, 0.3);
+}
+
+/* Puntuación */
+.puntuacion-container {
+    background: #f8fafc;
+    border-radius: var(--border-radius-sm);
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.puntuacion-label {
+    font-size: 0.9rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+.puntuacion-valor {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+}
+
+/* ============================================================================
+   BOTONES DE ACCIÓN
+   ============================================================================ */
+.acciones-container {
+    padding: 1.2rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.8rem;
+}
+
+.btn-accion {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.btn-evaluar {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-evaluar:hover {
+    background: var(--primary-dark-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.btn-ver {
+    background: white;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+}
+
+.btn-ver:hover {
+    background: var(--primary-blue);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-editar {
+    background: white;
+    color: var(--evaluated-green);
+    border: 2px solid var(--evaluated-green);
+}
+
+.btn-editar:hover {
+    background: var(--evaluated-green);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+   ESTADO VACÍO
+   ============================================================================ */
+.empty-state-evaluacion {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-card);
+    margin: 2rem 0;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state-title {
+    color: #4a5568;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    color: #718096;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 768px) {
+    .navbar-title h3 {
+        font-size: 1.1rem;
+    }
+    
+    .categoria-juez {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .stat-number-lg {
+        font-size: 2rem;
+    }
+    
+    .acciones-container {
+        flex-direction: column;
+    }
+    
+    .filter-chip-group {
+        justify-content: center;
+    }
+}
+
+/* ============================================================================
+   ANIMACIONES
+   ============================================================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.proyecto-card-evaluacion {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+/* ============================================================================
+   ESTILOS PARA LOS ESTADOS DE CATEGORÍA
+   ============================================================================ */
+[data-categoria="Programación"] .categoria-badge {
+    background: var(--programacion);
+}
+
+[data-categoria="Robótica"] .categoria-badge {
+    background: var(--robotica);
+}
+
+[data-categoria="Electrónica"] .categoria-badge {
+    background: var(--electronica);
+}
+
+[data-categoria="Ingeniería"] .categoria-badge {
+    background: var(--ingenieria);
+}
+
+/* Iconos por categoría en el badge */
+[data-categoria="Electrónica"] .categoria-badge i {
+    content: "\\f2db"; /* Icono de microchip */
+}
+
+[data-categoria="Programación"] .categoria-badge i {
+    content: "\\f121"; /* Icono de código */
+}
+
+[data-categoria="Robótica"] .categoria-badge i {
+    content: "\\f544"; /* Icono de robot */
+}
+
+[data-categoria="Ingeniería"] .categoria-badge i {
+    content: "\\f085"; /* Icono de engranaje */
+}

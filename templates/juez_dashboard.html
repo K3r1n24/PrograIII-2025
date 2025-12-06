@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="{{ 'dark' if tema == 'oscuro' else 'light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Juez - FLIA UGB 2025</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/juez.css') }}">
+    <style>
+        /* Iconos específicos por categoría */
+        .icon-categoria-electronica { color: #f72585; }
+        .icon-categoria-programacion { color: #4361ee; }
+        .icon-categoria-robotica { color: #7209b7; }
+        .icon-categoria-ingenieria { color: #4cc9f0; }
+        
+        /* Navbar icons */
+        .navbar-brand-icon {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        /* Profile icon */
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        /* Stat cards icons */
+        .stat-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-icon-total { background: rgba(67, 97, 238, 0.1); color: #4361ee; }
+        .stat-icon-evaluados { background: rgba(6, 214, 160, 0.1); color: #06d6a0; }
+        .stat-icon-pendientes { background: rgba(255, 158, 0, 0.1); color: #ff9e00; }
+        .stat-icon-progreso { background: rgba(114, 9, 183, 0.1); color: #7209b7; }
+        
+        /* Barra de progreso */
+        .progress-bar-custom {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7209b7, #4361ee);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 1.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================================================
+         NAVBAR CON ICONOS
+         ============================================================================ -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-evaluador">
+        <div class="container-fluid px-4">
+            <!-- Logo y Título con icono de evaluación -->
+            <div class="logo-container">
+                <div class="logo-icon-evaluador">
+                    <i class="fas fa-gavel"></i>
+                </div>
+                <div class="navbar-title">
+                    <h3><i class="fas fa-clipboard-check navbar-brand-icon me-2"></i>Panel del Juez Evaluador</h3>
+                    <small><i class="fas fa-university me-1"></i>FLIA UGB 2025</small>
+                </div>
+            </div>
+
+            <!-- Barra de búsqueda con icono -->
+            <div class="search-bar-container d-none d-lg-block mx-4">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" 
+                       id="searchInput" 
+                       class="form-control search-bar" 
+                       placeholder="Buscar proyectos, equipos...">
+            </div>
+
+            <!-- Categoría con icono dinámico -->
+            <div class="categoria-juez">
+                <i class="fas fa-microchip me-2"></i>
+                {{ categoria_juez }}
+            </div>
+
+            <!-- Perfil con icono y nombre -->
+            <div class="dropdown">
+                <button class="btn btn-evaluador dropdown-toggle d-flex align-items-center gap-2" type="button" 
+                        data-bs-toggle="dropdown">
+                    <div class="profile-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="text-start d-none d-md-block">
+                        <div class="fw-bold">{{ user_name }}</div>
+                        <small class="opacity-75"><i class="fas fa-gavel me-1"></i>Juez Evaluador</small>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i>Mi Perfil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Estadísticas</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================================
+         CONTENIDO PRINCIPAL
+         ============================================================================ -->
+    <div class="container-fluid px-4 py-4">
+        <!-- Barra de búsqueda móvil -->
+        <div class="row mb-4 d-lg-none">
+            <div class="col-12">
+                <div class="search-bar-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="searchInputMobile" 
+                           class="form-control search-bar" 
+                           placeholder="Buscar proyectos, equipos...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de estadísticas con iconos -->
+        <div class="stats-container">
+            <div class="row g-4">
+                <!-- Total proyectos -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="stat-card-evaluacion stat-card-blue" onclick="filtrarProyectos('all')">
+                        <div class="stat-icon-wrapper stat-icon-total">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="stat-number-lg">{{ estadisticas.total }}</div>
+                        <div class="stat-label">TOTAL PROYECTOS</div>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-microchip me-1 icon-categoria-electronica"></i>{{ categoria_juez }}
+                            </small>
+                        </div>
+                        <div class="stat-footer">
+                            <i class="fas fa-arrow-right text-primary me-1"></i> Ver todos
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluados -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="stat-card-evaluacion stat-card-green" onclick="filtrarProyectos('evaluados')">
+                        <div class="stat-icon-wrapper stat-icon-evaluados">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number-lg">{{ estadisticas.evaluados }}</div>
+                        <div class="stat-label">EVALUADOS</div>
+                        <div class="mt-2">
+                            <small class="text-success">
+                                <i class="fas fa-trophy me-1"></i>Completados
+                            </small>
+                        </div>
+                        <div class="stat-footer">
+                            <i class="fas fa-check text-success me-1"></i> Finalizados
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pendientes -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="stat-card-evaluacion stat-card-orange" onclick="filtrarProyectos('pendientes')">
+                        <div class="stat-icon-wrapper stat-icon-pendientes">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number-lg">{{ estadisticas.pendientes }}</div>
+                        <div class="stat-label">PENDIENTES</div>
+                        <div class="mt-2">
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-circle me-1"></i>Requieren atención
+                            </small>
+                        </div>
+                        <div class="stat-footer">
+                            <i class="fas fa-hourglass-half text-warning me-1"></i> Por evaluar
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progreso -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="stat-card-evaluacion stat-card-purple">
+                        <div class="stat-icon-wrapper stat-icon-progreso">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-number-lg">{{ estadisticas.progreso }}%</div>
+                        <div class="stat-label">TU PROGRESO</div>
+                        <div class="progress mt-3" style="height: 8px; border-radius: 4px;">
+                            <div class="progress-bar-custom">
+                                <div class="progress-bar-fill" id="progresoBar"></div>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="stat-footer mt-2">
+                            {% if estadisticas.progreso >= 75 %}
+                            <i class="fas fa-fire text-danger me-1"></i>¡Excelente!
+                            {% elif estadisticas.progreso >= 50 %}
+                            <i class="fas fa-rocket text-warning me-1"></i>Buen ritmo
+                            {% else %}
+                            <i class="fas fa-seedling text-success me-1"></i>Continúa así
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros con iconos -->
+        <div class="filters-section">
+            <div class="filter-chip-group">
+                <button class="filter-chip active" data-filter="all">
+                    <i class="fas fa-layer-group me-2"></i>
+                    <span>Todos</span>
+                    <span class="filter-count">{{ estadisticas.total }}</span>
+                </button>
+                <button class="filter-chip" data-filter="evaluados">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span>Evaluados</span>
+                    <span class="filter-count">{{ estadisticas.evaluados }}</span>
+                </button>
+                <button class="filter-chip" data-filter="pendientes">
+                    <i class="fas fa-clock me-2"></i>
+                    <span>Pendientes</span>
+                    <span class="filter-count">{{ estadisticas.pendientes }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de proyectos -->
+        <div class="proyectos-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4><i class="fas fa-project-diagram me-2 text-primary"></i>Proyectos Asignados</h4>
+                    <p class="mb-0 text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Selecciona un proyecto para comenzar la evaluación
+                    </p>
+                </div>
+                <div class="proyectos-count animate__animated animate__pulse" id="countVisible">
+                    {{ proyectos|length if proyectos else 0 }}
+                </div>
+            </div>
+        </div>
+
+        {% if proyectos and proyectos|length > 0 %}
+        <div class="row g-4" id="proyectosGrid">
+            {% for proyecto in proyectos %}
+            {% set es_evaluado = proyecto.evaluado %}
+            <div class="col-12 col-md-6 col-xl-4 proyecto-card-container"
+                 data-evaluado="{{ 'true' if es_evaluado else 'false' }}"
+                 data-equipo="{{ (proyecto.nombre_equipo or '')|lower }}"
+                 data-titulo="{{ (proyecto.titulo or '')|lower }}">
+                
+                <div class="proyecto-card-evaluacion animate__animated animate__fadeIn" 
+                     data-categoria="{{ proyecto.categoria or categoria_juez|lower }}">
+                    <!-- Header -->
+                    <div class="card-header-evaluacion">
+                        <div class="grupo-id">
+                            <div class="grupo-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <span class="id-badge">
+                                    <i class="fas fa-hashtag me-1"></i>ID: {{ "%03d"|format(loop.index) }}
+                                </span>
+                                <span class="grupo-codigo">
+                                    <i class="fas fa-qrcode me-1"></i>GRUPO-{{ "%03d"|format(loop.index) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="categoria-badge">
+                            {% set cat_lower = (proyecto.categoria or categoria_juez)|lower %}
+                            {% if 'electron' in cat_lower %}
+                                <i class="fas fa-microchip me-1"></i>
+                            {% elif 'program' in cat_lower %}
+                                <i class="fas fa-code me-1"></i>
+                            {% elif 'robot' in cat_lower %}
+                                <i class="fas fa-robot me-1"></i>
+                            {% elif 'ingenier' in cat_lower %}
+                                <i class="fas fa-cogs me-1"></i>
+                            {% else %}
+                                <i class="fas fa-tag me-1"></i>
+                            {% endif %}
+                            {{ proyecto.categoria or categoria_juez }}
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body-evaluacion">
+                        <h5 class="equipo-nombre">
+                            <i class="fas fa-users text-primary me-2"></i>
+                            {{ proyecto.nombre_equipo or 'Sin nombre' }}
+                        </h5>
+                        <p class="proyecto-titulo">
+                            <i class="fas fa-file-alt text-secondary me-2"></i>
+                            <strong>Proyecto:</strong> {{ proyecto.titulo or 'Sin título' }}
+                        </p>
+                        
+                        {% if proyecto.descripcion %}
+                        <p class="mb-3 text-muted">
+                            <i class="fas fa-align-left me-2"></i>
+                            {{ proyecto.descripcion[:150] }}{% if proyecto.descripcion|length > 150 %}...{% endif %}
+                        </p>
+                        {% endif %}
+
+                        <!-- Estado -->
+                        <div class="estado-evaluacion">
+                            {% if es_evaluado %}
+                            <span class="estado-badge estado-evaluado">
+                                <i class="fas fa-check-circle me-1"></i> Evaluado
+                            </span>
+                            <span class="ms-auto puntuacion-display">
+                                <i class="fas fa-star text-warning me-1"></i>
+                                {{ "%.1f"|format(proyecto.puntuacion_juez or 0) }}%
+                            </span>
+                            {% else %}
+                            <span class="estado-badge estado-pendiente">
+                                <i class="fas fa-clock me-1"></i> Pendiente
+                            </span>
+                            <span class="ms-auto text-muted">
+                                <i class="fas fa-hourglass-half me-1"></i>
+                                Espera evaluación
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Acciones - CORREGIDAS LAS RUTAS -->
+                    <div class="acciones-container">
+                        {% if es_evaluado %}
+                        <a href="/juez/ver-evaluacion/{{ proyecto.id }}" 
+                           class="btn-accion btn-ver">
+                            <i class="fas fa-eye me-2"></i> Ver
+                        </a>
+                        <a href="/juez/evaluar/{{ proyecto.id }}" 
+                           class="btn-accion btn-editar">
+                            <i class="fas fa-edit me-2"></i> Editar
+                        </a>
+                        {% else %}
+                        <a href="/juez/evaluar/{{ proyecto.id }}" 
+                           class="btn-accion btn-evaluar">
+                            <i class="fas fa-clipboard-check me-2"></i> Evaluar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state-evaluacion animate__animated animate__fadeIn">
+            <div class="empty-state-icon">
+                <i class="fas fa-folder-open fa-4x text-primary"></i>
+            </div>
+            <h4 class="empty-state-title">
+                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                No hay proyectos asignados
+            </h4>
+            <p class="empty-state-text">
+                Aún no se han asignado proyectos a la categoría <strong>{{ categoria_juez }}</strong>.
+            </p>
+            <div class="mt-3">
+                <button class="btn btn-primary" onclick="recargarPagina()">
+                    <i class="fas fa-sync-alt me-2"></i> Recargar
+                </button>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-home me-2"></i> Volver al inicio
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🎯 Panel del Juez - Cargando...');
+        
+        // Animar barra de progreso
+        setTimeout(function() {
+            var progresoBar = document.getElementById('progresoBar');
+            if (progresoBar) {
+                var progreso = parseFloat(progresoBar.style.width) || 0;
+                progresoBar.style.width = '0%';
+                setTimeout(function() {
+                    progresoBar.style.width = progreso + '%';
+                }, 300);
+            }
+        }, 500);
+        
+        // Filtrado de proyectos
+        var filterChips = document.querySelectorAll('.filter-chip');
+        var proyectoContainers = document.querySelectorAll('.proyecto-card-container');
+        var countElement = document.getElementById('countVisible');
+        var searchInput = document.getElementById('searchInput');
+        var searchInputMobile = document.getElementById('searchInputMobile');
+        
+        var filtroActivo = 'all';
+        var terminoBusqueda = '';
+        
+        // Búsqueda - Desktop
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                terminoBusqueda = this.value.toLowerCase().trim();
+                aplicarFiltros();
+            });
+        }
+        
+        // Búsqueda - Mobile
+        if (searchInputMobile) {
+            searchInputMobile.addEventListener('input', function() {
+                terminoBusqueda = this.value.toLowerCase().trim();
+                aplicarFiltros();
+            });
+        }
+        
+        // Filtros
+        filterChips.forEach(function(chip) {
+            chip.addEventListener('click', function() {
+                filterChips.forEach(function(c) {
+                    c.classList.remove('active');
+                });
+                this.classList.add('active');
+                filtroActivo = this.getAttribute('data-filter');
+                aplicarFiltros();
+            });
+        });
+        
+        function aplicarFiltros() {
+            var visibles = 0;
+            
+            proyectoContainers.forEach(function(container) {
+                var equipo = container.getAttribute('data-equipo') || '';
+                var titulo = container.getAttribute('data-titulo') || '';
+                var evaluado = container.getAttribute('data-evaluado');
+                
+                var matchBusqueda = terminoBusqueda === '' ||
+                                   equipo.includes(terminoBusqueda) ||
+                                   titulo.includes(terminoBusqueda);
+                
+                var matchFiltro = filtroActivo === 'all' ||
+                                 (filtroActivo === 'evaluados' && evaluado === 'true') ||
+                                 (filtroActivo === 'pendientes' && evaluado === 'false');
+                
+                if (matchBusqueda && matchFiltro) {
+                    container.style.display = 'block';
+                    visibles++;
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+            
+            if (countElement) {
+                countElement.textContent = visibles;
+            }
+        }
+        
+        // Inicializar
+        aplicarFiltros();
+        console.log('✅ Panel del Juez cargado exitosamente');
+    });
+    
+    function recargarPagina() {
+        window.location.reload();
+    }
+    
+    function filtrarProyectos(filtro) {
+        var chip = document.querySelector('[data-filter="' + filtro + '"]');
+        if (chip) {
+            chip.click();
+        }
+    }
+    </script>
+</body>
+</html>
